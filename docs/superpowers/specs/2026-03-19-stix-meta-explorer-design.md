@@ -120,7 +120,7 @@ Custom D3 x-force pulls incoming nodes left, outgoing nodes right.
 
 - **Hover node:** Highlights connected edges, shows tooltip with relationship detail
 - **Click node:** Expands in-place — reveals that node's own incoming/outgoing relationships. Graph grows organically.
-- **Expansion limit:** Soft cap at 2-3 degrees. Oldest expanded nodes auto-collapse when new ones expand.
+- **Expansion limit:** Soft cap at 2 degrees. Oldest expanded nodes auto-collapse when new ones expand.
 - **Focus button:** Collapses to just the selected node and its direct relationships
 - **Reset button:** Returns to the original object's graph state
 - **Zoom/pan:** D3 zoom — scroll to zoom, drag to pan
