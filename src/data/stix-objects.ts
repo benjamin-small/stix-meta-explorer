@@ -35,7 +35,7 @@ const scoCommonProps: Property[] = [
   { name: 'extensions', type: 'dictionary', required: false, description: 'Specifies any extensions of the object.', isCommon: true, isInteresting: false },
 ];
 
-const emptyRels = { outgoing: [], incoming: [] };
+function emptyRels() { return { outgoing: [], incoming: [] }; }
 
 // ---------------------------------------------------------------------------
 // SDOs (19)
@@ -53,7 +53,7 @@ const attackPattern: StixObjectType = {
     { name: 'aliases', type: 'list of string', required: false, description: 'Alternative names used to identify this Attack Pattern.', isCommon: false, isInteresting: false },
     { name: 'kill_chain_phases', type: 'list of kill-chain-phase', required: false, description: 'The list of Kill Chain Phases for which this Attack Pattern is used.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_axjijf603msy`,
 };
@@ -72,7 +72,7 @@ const campaign: StixObjectType = {
     { name: 'last_seen', type: 'timestamp', required: false, description: 'The time that this Campaign was last seen.', isCommon: false, isInteresting: false },
     { name: 'objective', type: 'string', required: false, description: 'The Campaign\'s primary goal, objective, desired outcome, or intended effect.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_pcpvfz4ik6d6`,
 };
@@ -87,7 +87,7 @@ const courseOfAction: StixObjectType = {
     { name: 'name', type: 'string', required: true, description: 'A name used to identify the Course of Action.', isCommon: false, isInteresting: true },
     { name: 'description', type: 'string', required: false, description: 'A description that provides more details and context about the Course of Action.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_a925mpw39txn`,
 };
@@ -104,7 +104,7 @@ const grouping: StixObjectType = {
     { name: 'context', type: 'string', required: true, description: 'A short descriptor of the particular context shared by the content referenced by the Grouping.', isCommon: false, isInteresting: true },
     { name: 'object_refs', type: 'list of identifier', required: true, description: 'Specifies the STIX Objects that are referred to by this Grouping.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_t56pn7elv6u7`,
 };
@@ -123,7 +123,7 @@ const identity: StixObjectType = {
     { name: 'sectors', type: 'list of string', required: false, description: 'The list of industry sectors that this Identity belongs to.', isCommon: false, isInteresting: true },
     { name: 'contact_information', type: 'string', required: false, description: 'The contact information for this Identity.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_wh296fiwpklp`,
 };
@@ -138,7 +138,7 @@ const incident: StixObjectType = {
     { name: 'name', type: 'string', required: true, description: 'A name used to identify the Incident.', isCommon: false, isInteresting: true },
     { name: 'description', type: 'string', required: false, description: 'A description that provides more details and context about the Incident.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_sczfhw64pjxt`,
 };
@@ -160,7 +160,7 @@ const indicator: StixObjectType = {
     { name: 'valid_until', type: 'timestamp', required: false, description: 'The time at which this Indicator should no longer be considered a valid indicator.', isCommon: false, isInteresting: false },
     { name: 'kill_chain_phases', type: 'list of kill-chain-phase', required: false, description: 'The Kill Chain Phases for which this Indicator is used.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_muftrcpnf89v`,
 };
@@ -180,7 +180,7 @@ const infrastructure: StixObjectType = {
     { name: 'first_seen', type: 'timestamp', required: false, description: 'The time that this Infrastructure was first seen performing malicious activities.', isCommon: false, isInteresting: false },
     { name: 'last_seen', type: 'timestamp', required: false, description: 'The time that this Infrastructure was last seen performing malicious activities.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_jo3k1o6lr9`,
 };
@@ -202,7 +202,7 @@ const intrusionSet: StixObjectType = {
     { name: 'primary_motivation', type: 'string', required: false, description: 'The primary reason, motivation, or purpose behind this Intrusion Set.', isCommon: false, isInteresting: true },
     { name: 'secondary_motivations', type: 'list of string', required: false, description: 'The secondary reasons, motivations, or purposes behind this Intrusion Set.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_5ol9xlbbnrdn`,
 };
@@ -226,7 +226,7 @@ const location: StixObjectType = {
     { name: 'street_address', type: 'string', required: false, description: 'The street address that this Location describes.', isCommon: false, isInteresting: false },
     { name: 'postal_code', type: 'string', required: false, description: 'The postal code for this Location.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_th8nitr8jb4k`,
 };
@@ -252,7 +252,7 @@ const malware: StixObjectType = {
     { name: 'capabilities', type: 'list of string', required: false, description: 'Any known capabilities of the malware (e.g., persists-after-system-reboot).', isCommon: false, isInteresting: false },
     { name: 'sample_refs', type: 'list of identifier', required: false, description: 'The sample files associated with this malware.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_s5l7katgbp09`,
 };
@@ -281,7 +281,7 @@ const malwareAnalysis: StixObjectType = {
     { name: 'analysis_sco_refs', type: 'list of identifier', required: false, description: 'References to the SCO objects that were captured during the analysis.', isCommon: false, isInteresting: true },
     { name: 'sample_ref', type: 'identifier', required: false, description: 'The sample that this analysis was performed against.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_6hdrixb3ua4j`,
 };
@@ -298,7 +298,7 @@ const note: StixObjectType = {
     { name: 'authors', type: 'list of string', required: false, description: 'The name of the author(s) of this note.', isCommon: false, isInteresting: true },
     { name: 'object_refs', type: 'list of identifier', required: true, description: 'The STIX Objects that the note is being applied to.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_gudodcg1sbb9`,
 };
@@ -315,7 +315,7 @@ const observedData: StixObjectType = {
     { name: 'number_observed', type: 'integer', required: true, description: 'The number of times that each SCO referenced by object_refs was observed.', isCommon: false, isInteresting: true },
     { name: 'object_refs', type: 'list of identifier', required: true, description: 'A list of SCOs and SROs representing the observation.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_p49j1fwoxldc`,
 };
@@ -332,7 +332,7 @@ const opinion: StixObjectType = {
     { name: 'opinion', type: 'enum', required: true, description: 'The opinion value (strongly-disagree, disagree, neutral, agree, strongly-agree).', isCommon: false, isInteresting: true },
     { name: 'object_refs', type: 'list of identifier', required: true, description: 'The STIX Objects that this Opinion is being applied to.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_ht1vtzfbtzda`,
 };
@@ -350,7 +350,7 @@ const report: StixObjectType = {
     { name: 'published', type: 'timestamp', required: true, description: 'The date that this Report was officially published.', isCommon: false, isInteresting: true },
     { name: 'object_refs', type: 'list of identifier', required: true, description: 'Specifies the STIX Objects that are referred to by this Report.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_n8bjzg1ysgdq`,
 };
@@ -376,7 +376,7 @@ const threatActor: StixObjectType = {
     { name: 'secondary_motivations', type: 'list of string', required: false, description: 'The secondary reasons, motivations, or purposes behind this Threat Actor.', isCommon: false, isInteresting: false },
     { name: 'personal_motivations', type: 'list of string', required: false, description: 'The personal reasons, motivations, or purposes of the Threat Actor.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_k017w16zutw`,
 };
@@ -395,7 +395,7 @@ const tool: StixObjectType = {
     { name: 'kill_chain_phases', type: 'list of kill-chain-phase', required: false, description: 'The list of Kill Chain Phases for which this Tool can be used.', isCommon: false, isInteresting: false },
     { name: 'tool_version', type: 'string', required: false, description: 'The version identifier associated with the Tool.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_z9v2v3kktega`,
 };
@@ -410,7 +410,7 @@ const vulnerability: StixObjectType = {
     { name: 'name', type: 'string', required: true, description: 'A name used to identify the Vulnerability.', isCommon: false, isInteresting: true },
     { name: 'description', type: 'string', required: false, description: 'A description that provides more details and context about the Vulnerability.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_q5ytzmajn6re`,
 };
@@ -433,7 +433,7 @@ const relationship: StixObjectType = {
     { name: 'start_time', type: 'timestamp', required: false, description: 'Represents the earliest time at which the Relationship between the objects exists.', isCommon: false, isInteresting: false },
     { name: 'stop_time', type: 'timestamp', required: false, description: 'Represents the latest time at which the Relationship between the objects exists.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_e2e1szrqfoan`,
 };
@@ -454,7 +454,7 @@ const sighting: StixObjectType = {
     { name: 'where_sighted_refs', type: 'list of identifier', required: false, description: 'A list of Identity objects representing the entities that saw the sighting.', isCommon: false, isInteresting: true },
     { name: 'summary', type: 'boolean', required: false, description: 'Indicates whether the Sighting represents a summary of multiple sightings.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_a795guqsap3r`,
 };
@@ -477,7 +477,7 @@ const artifact: StixObjectType = {
     { name: 'encryption_algorithm', type: 'enum', required: false, description: 'The type of encryption algorithm the binary data is encrypted with (e.g., AES-256-GCM).', isCommon: false, isInteresting: false },
     { name: 'decryption_key', type: 'string', required: false, description: 'The decryption key for the encrypted binary data.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_4jegwl6ojbes`,
 };
@@ -493,7 +493,7 @@ const autonomousSystem: StixObjectType = {
     { name: 'name', type: 'string', required: false, description: 'The name of the AS.', isCommon: false, isInteresting: true },
     { name: 'rir', type: 'string', required: false, description: 'The name of the Regional Internet Registry (RIR) that assigned the number to the AS.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_27gux0aol9e3`,
 };
@@ -512,7 +512,7 @@ const directory: StixObjectType = {
     { name: 'atime', type: 'timestamp', required: false, description: 'The date and time the directory was last accessed.', isCommon: false, isInteresting: false },
     { name: 'contains_refs', type: 'list of identifier', required: false, description: 'A list of references to other File and/or Directory objects contained within the directory.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_lyvpga5hlw52`,
 };
@@ -527,7 +527,7 @@ const domainName: StixObjectType = {
     { name: 'value', type: 'string', required: true, description: 'The value of the domain name (e.g., example.com).', isCommon: false, isInteresting: true },
     { name: 'resolves_to_refs', type: 'list of identifier', required: false, description: 'A list of references to IP addresses or domain names that this domain resolves to.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_prhhksbxbg87`,
 };
@@ -543,7 +543,7 @@ const emailAddr: StixObjectType = {
     { name: 'display_name', type: 'string', required: false, description: 'A single email display name, i.e., the name that is displayed to the user of a mail application.', isCommon: false, isInteresting: true },
     { name: 'belongs_to_ref', type: 'identifier', required: false, description: 'Specifies a reference to the user-account object that this email address belongs to.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_wmenahkvqmgj`,
 };
@@ -571,7 +571,7 @@ const emailMessage: StixObjectType = {
     { name: 'body_multipart', type: 'list of email-mime-part-type', required: false, description: 'The MIME parts that make up the email body for multipart messages.', isCommon: false, isInteresting: false },
     { name: 'raw_email_ref', type: 'identifier', required: false, description: 'A reference to an Artifact object containing the raw email message.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_grboc7sq5514`,
 };
@@ -596,7 +596,7 @@ const file: StixObjectType = {
     { name: 'contains_refs', type: 'list of identifier', required: false, description: 'References to other SCOs contained within the file (e.g., for archives).', isCommon: false, isInteresting: false },
     { name: 'content_ref', type: 'identifier', required: false, description: 'The content of the file as an Artifact object.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_99bl2dibcztv`,
 };
@@ -612,7 +612,7 @@ const ipv4Addr: StixObjectType = {
     { name: 'resolves_to_refs', type: 'list of identifier', required: false, description: 'References to one or more Layer 2 MAC addresses that the IPv4 address resolves to.', isCommon: false, isInteresting: true },
     { name: 'belongs_to_refs', type: 'list of identifier', required: false, description: 'References to one or more Autonomous Systems that the IPv4 address belongs to.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_ki1ufj1ku8s0`,
 };
@@ -628,7 +628,7 @@ const ipv6Addr: StixObjectType = {
     { name: 'resolves_to_refs', type: 'list of identifier', required: false, description: 'References to one or more Layer 2 MAC addresses that the IPv6 address resolves to.', isCommon: false, isInteresting: true },
     { name: 'belongs_to_refs', type: 'list of identifier', required: false, description: 'References to one or more Autonomous Systems that the IPv6 address belongs to.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_oeggeryskriq`,
 };
@@ -642,7 +642,7 @@ const macAddr: StixObjectType = {
     ...scoCommonProps,
     { name: 'value', type: 'string', required: true, description: 'The value of a single MAC address (e.g., d2:fb:49:24:37:18).', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_f92nr9plf58y`,
 };
@@ -656,7 +656,7 @@ const mutex: StixObjectType = {
     ...scoCommonProps,
     { name: 'name', type: 'string', required: true, description: 'The name of the mutex object.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_84hwlkdmev1w`,
 };
@@ -686,7 +686,7 @@ const networkTraffic: StixObjectType = {
     { name: 'encapsulates_refs', type: 'list of identifier', required: false, description: 'References to other network-traffic objects encapsulated by this network traffic.', isCommon: false, isInteresting: false },
     { name: 'encapsulated_by_ref', type: 'identifier', required: false, description: 'Reference to another network-traffic object that encapsulates this object.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_rgnc3w40xy`,
 };
@@ -710,7 +710,7 @@ const process: StixObjectType = {
     { name: 'parent_ref', type: 'identifier', required: false, description: 'The other process that spawned this one.', isCommon: false, isInteresting: false },
     { name: 'child_refs', type: 'list of identifier', required: false, description: 'The other processes that were spawned by this process.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_hclzia4tf8fz`,
 };
@@ -729,7 +729,7 @@ const software: StixObjectType = {
     { name: 'vendor', type: 'string', required: false, description: 'The name of the vendor of the software.', isCommon: false, isInteresting: true },
     { name: 'version', type: 'string', required: false, description: 'The version of the software.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_7rkyhtkdthok`,
 };
@@ -743,7 +743,7 @@ const url: StixObjectType = {
     ...scoCommonProps,
     { name: 'value', type: 'string', required: true, description: 'The value of the URL.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_ah3hict2dez0`,
 };
@@ -770,7 +770,7 @@ const userAccount: StixObjectType = {
     { name: 'account_first_login', type: 'timestamp', required: false, description: 'When the account was first accessed.', isCommon: false, isInteresting: false },
     { name: 'account_last_login', type: 'timestamp', required: false, description: 'When the account was last accessed.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_azo70vgj1vm2`,
 };
@@ -788,7 +788,7 @@ const windowsRegistryKey: StixObjectType = {
     { name: 'creator_user_ref', type: 'identifier', required: false, description: 'A reference to the user account that created the registry key.', isCommon: false, isInteresting: false },
     { name: 'number_of_subkeys', type: 'integer', required: false, description: 'The number of subkeys contained under the registry key.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_luvw8wjlfo3y`,
 };
@@ -814,7 +814,7 @@ const x509Certificate: StixObjectType = {
     { name: 'subject_public_key_exponent', type: 'integer', required: false, description: 'The exponent portion of the subject\'s public key.', isCommon: false, isInteresting: false },
     { name: 'x509_v3_extensions', type: 'x509-v3-extensions-type', required: false, description: 'Any standard X.509 v3 extensions that may be used in the certificate.', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_8abcy1o5x9w1`,
 };
@@ -833,7 +833,7 @@ const bundle: StixObjectType = {
     { name: 'id', type: 'identifier', required: true, description: 'An identifier for this Bundle.', isCommon: false, isInteresting: true },
     { name: 'objects', type: 'list of object', required: false, description: 'A list of STIX Objects contained within this Bundle.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_gms872kuzdmg`,
 };
@@ -852,7 +852,7 @@ const extensionDefinition: StixObjectType = {
     { name: 'extension_types', type: 'list of string', required: true, description: 'The type(s) of extension that this definition describes (e.g., new-sdo, property-extension).', isCommon: false, isInteresting: true },
     { name: 'extension_properties', type: 'list of string', required: false, description: 'If present, defines additional properties for an extension of type "property-extension".', isCommon: false, isInteresting: false },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_32j232tfvtly`,
 };
@@ -868,7 +868,7 @@ const languageContent: StixObjectType = {
     { name: 'object_modified', type: 'timestamp', required: false, description: 'Identifies the modified time of the object that this Language Content applies to.', isCommon: false, isInteresting: false },
     { name: 'contents', type: 'dictionary', required: true, description: 'The translated content organized by language code and property name.', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_z9r1cwtu8jja`,
 };
@@ -892,7 +892,7 @@ const markingDefinition: StixObjectType = {
     { name: 'definition_type', type: 'string', required: false, description: 'The definition_type property identifies the type of Marking Definition (e.g., statement, tlp).', isCommon: false, isInteresting: true },
     { name: 'definition', type: 'object', required: false, description: 'The definition property contains the marking object itself (e.g., a Statement or TLP marking).', isCommon: false, isInteresting: true },
   ],
-  relationships: emptyRels,
+  relationships: emptyRels(),
   example: {},
   specUrl: `${SPEC_BASE}#_k5fndj2c7c1k`,
 };

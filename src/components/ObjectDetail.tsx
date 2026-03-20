@@ -3,6 +3,7 @@ import { CATEGORY_COLORS, CATEGORY_LABELS } from '../types/stix';
 import PropertyTable from './PropertyTable';
 import JsonExample from './JsonExample';
 import RelationshipGraph from './RelationshipGraph';
+import RelationshipTable from './RelationshipTable';
 
 interface ObjectDetailProps {
   object: StixObjectType;
@@ -49,10 +50,18 @@ export default function ObjectDetail({ object }: ObjectDetailProps) {
         </div>
       )}
 
-      {/* Relationship Graph */}
+      {/* Relationship Table */}
       <div>
         <h3 className="text-sm font-semibold text-cti-muted uppercase tracking-wider mb-3">
           Relationships
+        </h3>
+        <RelationshipTable relationships={object.relationships} objectType={object.type} />
+      </div>
+
+      {/* Relationship Graph */}
+      <div>
+        <h3 className="text-sm font-semibold text-cti-muted uppercase tracking-wider mb-3">
+          Relationship Graph
         </h3>
         <RelationshipGraph object={object} />
       </div>

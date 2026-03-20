@@ -8,7 +8,9 @@ interface RelationshipGraphProps {
   object: StixObjectType;
 }
 
-interface SimNode extends GraphNode, d3.SimulationNodeDatum {}
+interface SimNode extends GraphNode, d3.SimulationNodeDatum {
+  targetY?: number;
+}
 
 interface SimEdge extends d3.SimulationLinkDatum<SimNode> {
   id: string;
@@ -48,9 +50,27 @@ function ForceGraph({ object }: { object: StixObjectType }) {
   useEffect(() => {
     const simNodeData: SimNode[] = nodes.map((n) => ({
       ...n,
-      x: n.side === 'left' ? WIDTH * 0.25 : n.side === 'right' ? WIDTH * 0.75 : WIDTH / 2,
-      y: HEIGHT / 2 + (Math.random() - 0.5) * 100,
+      x: n.side === 'left' ? WIDTH * 0.2 : n.side === 'right' ? WIDTH * 0.8 : WIDTH / 2,
+      y: HEIGHT / 2,
     }));
+
+    // Distribute nodes vertically within their column
+    const leftNodes = simNodeData.filter((n) => n.side === 'left');
+    const rightNodes = simNodeData.filter((n) => n.side === 'right');
+    const ySpacing = (side: SimNode[], index: number) => {
+      const count = side.length;
+      const totalHeight = HEIGHT - 80; // 40px padding top/bottom
+      const gap = count > 1 ? totalHeight / (count - 1) : 0;
+      return 40 + index * gap;
+    };
+    leftNodes.forEach((n, i) => {
+      n.targetY = ySpacing(leftNodes, i);
+      n.y = n.targetY;
+    });
+    rightNodes.forEach((n, i) => {
+      n.targetY = ySpacing(rightNodes, i);
+      n.y = n.targetY;
+    });
 
     const nodeById = new Map(simNodeData.map((n) => [n.id, n]));
 
@@ -74,17 +94,16 @@ function ForceGraph({ object }: { object: StixObjectType }) {
           .id((d) => d.id)
           .distance(120),
       )
-      .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(WIDTH / 2, HEIGHT / 2))
+      .force('charge', d3.forceManyBody().strength(-150))
       .force(
         'x',
         d3.forceX<SimNode>((d) =>
           d.side === 'left' ? WIDTH * 0.2 : d.side === 'right' ? WIDTH * 0.8 : WIDTH / 2,
-        ).strength(0.3),
+        ).strength(0.8),
       )
       .force(
         'y',
-        d3.forceY(HEIGHT / 2).strength(0.1),
+        d3.forceY<SimNode>((d) => d.targetY ?? HEIGHT / 2).strength(0.5),
       )
       .force('collision', d3.forceCollide(NODE_RADIUS + 10))
       .alphaDecay(0.03);
@@ -121,6 +140,41 @@ function ForceGraph({ object }: { object: StixObjectType }) {
     };
   }, []);
 
+  // D3 drag on nodes
+  useEffect(() => {
+    if (!gRef.current || !simulationRef.current) return;
+    const simulation = simulationRef.current;
+    const nodeById = new Map(simNodes.map((n) => [n.id, n]));
+
+    const selection = d3.select(gRef.current)
+      .selectAll<SVGGElement, SimNode>('.graph-node');
+
+    selection.each(function () {
+      const nodeId = this.getAttribute('data-node-id');
+      if (!nodeId) return;
+      const node = nodeById.get(nodeId);
+      if (node) d3.select<SVGGElement, SimNode>(this).datum(node);
+    });
+
+    selection.call(
+        d3.drag<SVGGElement, SimNode>()
+          .on('start', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          }),
+      );
+  }, [simNodes]);
+
   const getSourceTarget = useCallback(
     (edge: SimEdge) => {
       const source = typeof edge.source === 'object' ? (edge.source as SimNode) : null;
@@ -153,7 +207,7 @@ function ForceGraph({ object }: { object: StixObjectType }) {
           </span>
         )}
         <span className="text-xs text-cti-muted self-center ml-auto">
-          Click to expand, double-click to focus, scroll to zoom
+          Drag to move, click to expand, double-click to focus, scroll to zoom
         </span>
       </div>
 
@@ -248,6 +302,8 @@ function ForceGraph({ object }: { object: StixObjectType }) {
               return (
                 <g
                   key={node.id}
+                  className="graph-node"
+                  data-node-id={node.id}
                   transform={`translate(${x}, ${y})`}
                   cursor="pointer"
                   onClick={() => {

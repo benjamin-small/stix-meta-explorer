@@ -1,6 +1,5 @@
 {
-  "name": "stix-scaffold",
-  "private": true,
+  "name": "stix-meta-explorer",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
