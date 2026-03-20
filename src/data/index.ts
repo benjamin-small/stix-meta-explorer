@@ -1,9 +1,11 @@
 import { stixObjects } from './stix-objects';
 import { relationships } from './relationships';
+import { examples } from './examples';
 import type { StixObjectType } from '../types/stix';
 
 export { stixObjects };
 export { relationships };
+export { examples };
 
 const objectMap = new Map<string, StixObjectType>(
   stixObjects.map((obj) => [obj.type, obj])
@@ -52,4 +54,11 @@ export function getObjectByType(type: string): StixObjectType | undefined {
 
 export function getObjectsByCategory(category: StixObjectType['category']): StixObjectType[] {
   return stixObjects.filter((obj) => obj.category === category);
+}
+
+// Populate examples on each object
+for (const obj of stixObjects) {
+  if (examples[obj.type]) {
+    obj.example = examples[obj.type];
+  }
 }
