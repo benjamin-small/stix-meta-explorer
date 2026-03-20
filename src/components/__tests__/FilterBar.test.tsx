@@ -1,17 +1,20 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import FilterBar from '../FilterBar';
 
+const defaultCounts = { sdo: 19, sro: 2, sco: 18, meta: 4 };
+
 test('renders all four category chips', () => {
   render(
     <FilterBar
       activeCategories={new Set(['sdo', 'sro', 'sco', 'meta'])}
       onToggleCategory={() => {}}
+      counts={defaultCounts}
     />
   );
-  expect(screen.getByText('SDO')).toBeInTheDocument();
-  expect(screen.getByText('SRO')).toBeInTheDocument();
-  expect(screen.getByText('SCO')).toBeInTheDocument();
-  expect(screen.getByText('Meta')).toBeInTheDocument();
+  expect(screen.getByText('SDO (19)')).toBeInTheDocument();
+  expect(screen.getByText('SRO (2)')).toBeInTheDocument();
+  expect(screen.getByText('SCO (18)')).toBeInTheDocument();
+  expect(screen.getByText('Meta (4)')).toBeInTheDocument();
 });
 
 test('calls onToggleCategory when chip clicked', () => {
@@ -20,9 +23,10 @@ test('calls onToggleCategory when chip clicked', () => {
     <FilterBar
       activeCategories={new Set(['sdo', 'sro', 'sco', 'meta'])}
       onToggleCategory={onToggle}
+      counts={defaultCounts}
     />
   );
-  fireEvent.click(screen.getByText('SRO'));
+  fireEvent.click(screen.getByText('SRO (2)'));
   expect(onToggle).toHaveBeenCalledWith('sro');
 });
 
@@ -31,8 +35,9 @@ test('inactive chip has reduced opacity styling', () => {
     <FilterBar
       activeCategories={new Set(['sdo', 'sco', 'meta'])}
       onToggleCategory={() => {}}
+      counts={defaultCounts}
     />
   );
-  const sroChip = screen.getByText('SRO').closest('button');
+  const sroChip = screen.getByText('SRO (2)').closest('button');
   expect(sroChip).toHaveClass('opacity-40');
 });

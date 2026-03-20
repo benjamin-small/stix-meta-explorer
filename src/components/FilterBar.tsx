@@ -4,6 +4,7 @@ import { CATEGORY_COLORS } from '../types/stix';
 interface FilterBarProps {
   activeCategories: Set<StixCategory>;
   onToggleCategory: (category: StixCategory) => void;
+  counts: Record<StixCategory, number>;
 }
 
 const chips: { category: StixCategory; label: string }[] = [
@@ -13,7 +14,7 @@ const chips: { category: StixCategory; label: string }[] = [
   { category: 'meta', label: 'Meta' },
 ];
 
-export default function FilterBar({ activeCategories, onToggleCategory }: FilterBarProps) {
+export default function FilterBar({ activeCategories, onToggleCategory, counts }: FilterBarProps) {
   return (
     <div className="flex gap-2 px-6 py-3">
       {chips.map(({ category, label }) => {
@@ -31,7 +32,7 @@ export default function FilterBar({ activeCategories, onToggleCategory }: Filter
               backgroundColor: active ? `${CATEGORY_COLORS[category]}15` : 'transparent',
             }}
           >
-            {label}
+            {label} ({counts[category]})
           </button>
         );
       })}

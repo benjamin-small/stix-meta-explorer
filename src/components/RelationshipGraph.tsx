@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import type { StixObjectType } from '../types/stix';
 import { CATEGORY_COLORS } from '../types/stix';
-import { useForceGraph, type GraphNode, type GraphEdge } from '../hooks/useForceGraph';
+import { useForceGraph, type GraphNode } from '../hooks/useForceGraph';
 
 interface RelationshipGraphProps {
   object: StixObjectType;

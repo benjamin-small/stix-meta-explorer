@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { StixObjectType } from '../types/stix';
 import ObjectDetail from './ObjectDetail';
 
@@ -7,6 +8,15 @@ interface DetailDrawerProps {
 }
 
 export default function DetailDrawer({ object, onClose }: DetailDrawerProps) {
+  useEffect(() => {
+    if (!object) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [object, onClose]);
+
   if (!object) return null;
 
   return (

@@ -9,10 +9,10 @@ test('renders app title and search', () => {
 
 test('renders filter chips', () => {
   render(<App />);
-  expect(screen.getByText('SDO')).toBeInTheDocument();
-  expect(screen.getByText('SRO')).toBeInTheDocument();
-  expect(screen.getByText('SCO')).toBeInTheDocument();
-  expect(screen.getByText('Meta')).toBeInTheDocument();
+  expect(screen.getByText('SDO (19)')).toBeInTheDocument();
+  expect(screen.getByText('SRO (2)')).toBeInTheDocument();
+  expect(screen.getByText('SCO (18)')).toBeInTheDocument();
+  expect(screen.getByText('Meta (4)')).toBeInTheDocument();
 });
 
 test('renders object cards', () => {
