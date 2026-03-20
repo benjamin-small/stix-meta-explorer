@@ -21,6 +21,15 @@ export default {
       fontFamily: {
         mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'monospace'],
       },
+      keyframes: {
+        'slide-in': {
+          from: { transform: 'translateX(100%)' },
+          to: { transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'slide-in': 'slide-in 0.2s ease-out',
+      },
     },
   },
   plugins: [],
