@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# STIX Meta Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive reference tool for exploring the [STIX 2.1](https://oasis-open.github.io/cti-documentation/stix/intro.html) specification. Browse, search, and visualize the structure, properties, and relationships of all STIX object types.
 
-Currently, two official plugins are available:
+**Live demo:** https://benjamin-small.github.io/stix-meta-explorer/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What is STIX?
 
-## React Compiler
+STIX (Structured Threat Information Expression) is an open standard for representing cyber threat intelligence. It defines a common language for describing threats, attacks, vulnerabilities, and defensive measures so that organizations can share and analyze threat data consistently.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Browse all STIX 2.1 object types** — 43 objects across SDOs, SROs, SCOs, and Meta Objects
+- **Filter by category** — Quickly narrow down to Domain Objects, Relationship Objects, Cyber Observables, or Meta Objects
+- **Search** — Find objects by name or description
+- **Property reference** — View every property for each object type, including data types, requirement status, and descriptions linked to the official OASIS spec
+- **Relationship graph** — Interactive D3 force-directed visualization showing how objects relate to each other
+- **Relationship table** — Tabular view of all incoming and outgoing relationships
+- **Example JSON** — See representative JSON for each object type
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+React, TypeScript, Vite, Tailwind CSS, D3
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Development
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Build for production:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npm run build
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Run tests:
+
+```bash
+npx vitest run
 ```
