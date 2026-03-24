@@ -1,23 +1,37 @@
 import { renderHook, act } from '@testing-library/react';
 import { useFilter } from '../useFilter';
 
-test('returns all objects with no filters', () => {
+test('returns all objects when no category selected', () => {
   const { result } = renderHook(() => useFilter());
   expect(result.current.filteredObjects).toHaveLength(43);
+  expect(result.current.activeCategories).toEqual(new Set());
 });
 
-test('toggleCategory removes that category', () => {
+test('toggleCategory selects that category exclusively', () => {
   const { result } = renderHook(() => useFilter());
-  act(() => result.current.toggleCategory('sro'));
-  const types = result.current.filteredObjects.map((o) => o.category);
-  expect(types).not.toContain('sro');
+  act(() => result.current.toggleCategory('sdo'));
+  for (const obj of result.current.filteredObjects) {
+    expect(obj.category).toBe('sdo');
+  }
+  expect(result.current.activeCategories).toEqual(new Set(['sdo']));
 });
 
-test('toggleCategory twice re-enables category', () => {
+test('toggling a different category switches to it exclusively', () => {
+  const { result } = renderHook(() => useFilter());
+  act(() => result.current.toggleCategory('sdo'));
+  act(() => result.current.toggleCategory('sco'));
+  for (const obj of result.current.filteredObjects) {
+    expect(obj.category).toBe('sco');
+  }
+  expect(result.current.activeCategories).toEqual(new Set(['sco']));
+});
+
+test('toggling the same category twice deselects it (show all)', () => {
   const { result } = renderHook(() => useFilter());
   act(() => result.current.toggleCategory('sro'));
   act(() => result.current.toggleCategory('sro'));
   expect(result.current.filteredObjects).toHaveLength(43);
+  expect(result.current.activeCategories).toEqual(new Set());
 });
 
 test('search filters by name', () => {
@@ -40,20 +54,9 @@ test('search filters by description', () => {
 
 test('search and category filters combine', () => {
   const { result } = renderHook(() => useFilter());
-  act(() => {
-    result.current.toggleCategory('sco');
-    result.current.toggleCategory('sro');
-    result.current.toggleCategory('meta');
-  });
+  act(() => result.current.toggleCategory('sdo'));
   act(() => result.current.setSearch('attack'));
   for (const obj of result.current.filteredObjects) {
     expect(obj.category).toBe('sdo');
   }
-});
-
-test('activeCategories reflects toggle state', () => {
-  const { result } = renderHook(() => useFilter());
-  expect(result.current.activeCategories).toEqual(new Set(['sdo', 'sro', 'sco', 'meta']));
-  act(() => result.current.toggleCategory('sro'));
-  expect(result.current.activeCategories).toEqual(new Set(['sdo', 'sco', 'meta']));
 });

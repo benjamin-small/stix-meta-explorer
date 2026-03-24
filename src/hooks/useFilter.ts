@@ -4,26 +4,23 @@ import type { StixCategory } from '../types/stix';
 
 export function useFilter() {
   const [activeCategories, setActiveCategories] = useState<Set<StixCategory>>(
-    new Set(['sdo', 'sro', 'sco', 'meta'])
+    new Set()
   );
   const [search, setSearch] = useState('');
 
   const toggleCategory = (category: StixCategory) => {
     setActiveCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(category)) {
-        next.delete(category);
-      } else {
-        next.add(category);
+      if (prev.has(category)) {
+        return new Set();
       }
-      return next;
+      return new Set([category]);
     });
   };
 
   const filteredObjects = useMemo(() => {
     const query = search.toLowerCase().trim();
     return stixObjects.filter((obj) => {
-      if (!activeCategories.has(obj.category)) return false;
+      if (activeCategories.size > 0 && !activeCategories.has(obj.category)) return false;
       if (query) {
         return (
           obj.name.toLowerCase().includes(query) ||
