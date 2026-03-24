@@ -35,3 +35,19 @@ test('search filters cards', () => {
   expect(screen.getByText('Malware')).toBeInTheDocument();
   expect(screen.queryByText('Campaign')).not.toBeInTheDocument();
 });
+
+test('opens drawer from ?type query param on load', () => {
+  window.history.replaceState({}, '', '?type=malware');
+  render(<App />);
+  expect(screen.getAllByText('Malware').length).toBeGreaterThanOrEqual(1);
+  expect(screen.getByText('Domain Object')).toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
+test('ignores invalid ?type param', () => {
+  window.history.replaceState({}, '', '?type=not-real');
+  render(<App />);
+  expect(screen.getByText('STIX 2.1 Meta Explorer')).toBeInTheDocument();
+  expect(screen.queryByText('Domain Object')).not.toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
