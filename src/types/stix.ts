@@ -24,6 +24,7 @@ export interface StixObjectType {
     outgoing: RelationshipDef[];
     incoming: RelationshipDef[];
   };
+  relationshipNote?: string;
   example: Record<string, unknown>;
   specUrl: string;
 }

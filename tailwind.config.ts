@@ -16,6 +16,7 @@ export default {
           sco: '#58a6ff',
           sro: '#bc8cff',
           meta: '#3fb950',
+          accent: '#39d2c0',
         },
       },
       fontFamily: {

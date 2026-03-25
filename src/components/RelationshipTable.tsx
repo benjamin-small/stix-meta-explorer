@@ -6,16 +6,19 @@ interface RelationshipTableProps {
     incoming: RelationshipDef[];
   };
   objectType: string;
+  relationshipNote?: string;
 }
 
-export default function RelationshipTable({ relationships, objectType }: RelationshipTableProps) {
+export default function RelationshipTable({ relationships, objectType, relationshipNote }: RelationshipTableProps) {
   const { outgoing, incoming } = relationships;
 
   if (outgoing.length === 0 && incoming.length === 0) {
     return (
-      <p className="text-sm text-cti-muted italic">
-        No spec-defined relationships.
-      </p>
+      <div className="rounded-lg border border-cti-border bg-cti-bg px-4 py-3">
+        <p className="text-sm text-cti-muted">
+          {relationshipNote ?? 'No spec-defined relationships. Custom relationships may be defined via extensions.'}
+        </p>
+      </div>
     );
   }
 

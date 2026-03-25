@@ -6,6 +6,7 @@ import { useForceGraph, type GraphNode } from '../hooks/useForceGraph';
 
 interface RelationshipGraphProps {
   object: StixObjectType;
+  relationshipNote?: string;
 }
 
 interface SimNode extends GraphNode, d3.SimulationNodeDatum {
@@ -21,15 +22,17 @@ const NODE_RADIUS = 28;
 const WIDTH = 900;
 const HEIGHT = 500;
 
-export default function RelationshipGraph({ object }: RelationshipGraphProps) {
+export default function RelationshipGraph({ object, relationshipNote }: RelationshipGraphProps) {
   const totalRelationships =
     object.relationships.outgoing.length + object.relationships.incoming.length;
 
   if (totalRelationships === 0) {
     return (
-      <p className="text-sm text-cti-muted italic">
-        No spec-defined relationships. Custom relationships may be defined via extensions.
-      </p>
+      <div className="rounded-lg border border-cti-border bg-cti-bg px-4 py-3">
+        <p className="text-sm text-cti-muted">
+          {relationshipNote ?? 'No spec-defined relationships. Custom relationships may be defined via extensions.'}
+        </p>
+      </div>
     );
   }
 

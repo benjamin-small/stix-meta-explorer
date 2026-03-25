@@ -81,7 +81,7 @@ export default function ObjectDetail({ object }: ObjectDetailProps) {
         <h3 className="text-sm font-semibold text-cti-muted uppercase tracking-wider mb-3">
           Relationships
         </h3>
-        <RelationshipTable relationships={object.relationships} objectType={object.type} />
+        <RelationshipTable relationships={object.relationships} objectType={object.type} relationshipNote={object.relationshipNote} />
       </div>
 
       {/* Relationship Graph */}
@@ -89,7 +89,7 @@ export default function ObjectDetail({ object }: ObjectDetailProps) {
         <h3 className="text-sm font-semibold text-cti-muted uppercase tracking-wider mb-3">
           Relationship Graph
         </h3>
-        <RelationshipGraph object={object} />
+        <RelationshipGraph object={object} relationshipNote={object.relationshipNote} />
       </div>
 
       {/* Spec Link */}
