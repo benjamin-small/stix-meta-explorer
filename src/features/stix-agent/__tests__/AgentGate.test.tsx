@@ -30,7 +30,8 @@ test('enabled feature stays dormant until opened, and closing terminates its wor
   expect(FakeWorker.instances).toHaveLength(0);
   fireEvent.click(screen.getByRole('button', { name: /Ask STIX/ }));
   await screen.findByRole('dialog', { name: /STIX assistant/ });
-  expect(FakeWorker.instances).toHaveLength(1);
+  // The panel can render before its passive effect creates the worker.
+  await waitFor(() => expect(FakeWorker.instances).toHaveLength(1));
   expect(FakeWorker.instances[0].postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'init', manifestUrl: expect.stringContaining('/stix-agent/model/manifest.json') }));
   fireEvent.click(screen.getByRole('button', { name: 'Close STIX assistant' }));
   expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
@@ -40,6 +41,7 @@ test('stop ends loading immediately and resume starts a fresh worker', async () 
   render(<AgentGate />);
   fireEvent.click(screen.getByRole('button', { name: /Ask STIX/ }));
   await screen.findByRole('dialog');
+  await waitFor(() => expect(FakeWorker.instances).toHaveLength(1));
   fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
   expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
   fireEvent.click(screen.getByRole('button', { name: 'Resume chat' }));
