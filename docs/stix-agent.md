@@ -15,7 +15,7 @@ npm install
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-Open `http://127.0.0.1:5173/stix-meta-explorer/`, then **Ask STIX**. Existing local model assets are under `public/stix-agent/model/`; these large files are intentionally ignored by Git. A fresh clone needs the setup/training commands below or a copy of the prepared STIX model bundle. A missing bundle produces an actionable error in the sidebar and leaves the explorer usable.
+Open `http://127.0.0.1:5173/stix-meta-explorer/`, then **Ask STIX**. Existing local model assets are under `public/stix-agent/model/`; these large files are intentionally ignored by Git. A fresh clone can run `npm run agent:release:install` to download the pinned prebuilt model and WASM release; no Rust or training environment is needed for this path. The setup/training commands below reproduce the model itself. A missing bundle produces an actionable error in the sidebar and leaves the explorer usable.
 
 For Windows connecting to this Mac, run this on Windows while the development server is running:
 
@@ -33,7 +33,7 @@ VITE_STIX_AGENT=true npm run build     # include the enabled edge tab
 npm run preview -- --host 127.0.0.1
 ```
 
-This is a Vite build-time flag; changing it requires restarting the dev server or rebuilding. `.env.development.local` affects development only. The existing GitHub Pages workflow remains unchanged and does not enable the flag. No deployment is part of this change. All URLs respect the existing `/stix-meta-explorer/` base path. A host that enables the feature must also serve the generated model/runtime assets at that path. The flag is a product toggle, not an access-control mechanism.
+This is a Vite build-time flag; changing it requires restarting the dev server or rebuilding. `.env.development.local` affects development only. The GitHub Pages workflow explicitly enables the flag after installing the pinned prebuilt release. Ordinary builds still default to disabled. All URLs respect the existing `/stix-meta-explorer/` base path. A host that enables the feature must also serve the generated model/runtime assets at that path. The flag is a product toggle, not an access-control mechanism.
 
 ## Runtime and isolation
 
@@ -88,3 +88,22 @@ This assistant explains STIX and suggests modeling rules. It does not execute ac
 ## Licenses
 
 Flare's MIT notice is included in `public/stix-agent/FLARE-LICENSE.txt`. The model is derived from HuggingFaceTB/SmolLM2-360M-Instruct under Apache-2.0; its model license is included alongside the source notices. OASIS explanatory material is accompanied by the complete OASIS notices. The modified runtime and trained model are identified in the bundle manifest. Other build/runtime dependencies retain their respective licenses.
+
+## GitHub Pages publication
+
+The public site is https://benjamin-small.github.io/stix-meta-explorer/. The workflow downloads the archive pinned in `scripts/agent/release-lock.json`, verifies the archive and every member, checks that the reference corpus matches this checkout, then builds with `VITE_STIX_AGENT=true`. The model, tokenizer and WASM are served from the same Pages origin as the app. No Python, training job, or inference server runs for visitors.
+
+Large generated files stay out of Git. They are published in the `stix-agent-v0.1.0` GitHub release. To install the validated prebuilt assets locally:
+
+```bash
+npm run agent:release:install
+VITE_STIX_AGENT=true npm run build
+```
+
+For future model/runtime releases, finish evaluation and `agent:assets`, then package a new semantic version (do not replace an existing release asset):
+
+```bash
+npm run agent:release:pack -- --tag stix-agent-v0.2.0
+```
+
+Commit the updated release lock and matching reference/runtime manifests, and publish the resulting `.agent-artifacts/releases/*.zip` to that tag before pushing the enabled deployment workflow to main. Verify from a clean checkout with `agent:release:install`, tests and an enabled build. The pack/install tools use Python 3.11 or newer. Neither tool retrains the model. Reverting the deployment commit restores the previous Pages behavior.

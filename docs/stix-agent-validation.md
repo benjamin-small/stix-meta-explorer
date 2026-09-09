@@ -97,4 +97,4 @@ Reproduction commands are in [stix-agent.md](stix-agent.md). Detailed local outp
 - `.agent-artifacts/evaluation/wasm-parity.json`, `data-audit.json` and `browser.json`: parity, dataset and browser observations.
 - `.agent-artifacts/bundles/q4_0` and `q8_0`: portable model bundles; `public/stix-agent/model` is the installed Q4 bundle.
 
-No deployment or upstream publication was performed.
+The measurements above were recorded before publication. The subsequent Pages deployment packages these same validated model/runtime bytes in the `stix-agent-v0.1.0` release and enables the sidebar in the Pages workflow. Flare upstream publication is separate and was not performed.

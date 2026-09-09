@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "tag": "stix-agent-v0.1.0",
+  "url": "https://github.com/benjamin-small/stix-meta-explorer/releases/download/stix-agent-v0.1.0/stix-agent-v0.1.0.zip",
+  "bytes": 217633084,
+  "sha256": "7e975bee92ab26e69c8aa872b8c273317858f1ae32e85401c63cf585fc647785",
+  "files": {
+    "FLARE-LICENSE.txt": {
+      "bytes": 1069,
+      "sha256": "45da353da0be53cd444c3a96ff3cb72f28c35f0843442700a0198de62666a6ab"
+    },
+    "MODEL-CARD.md": {
+      "bytes": 7304,
+      "sha256": "6b88794416ac9da8f254ebb0bec228967a2bdd0badf9a2853863928b25facd95"
+    },
+    "MODEL-LICENSE.txt": {
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "OASIS-NOTICES.txt": {
+      "bytes": 15110,
+      "sha256": "f8ad83612ff1a6b9703415d7c34b3a63ba60fe2f43a4f8524ab8f4f94754ad75"
+    },
+    "knowledge.json": {
+      "bytes": 787837,
+      "sha256": "217afb16eda558bbef3ec978340ba8c09a776269bcec964f609cf05944f624ae"
+    },
+    "model/config.json": {
+      "bytes": 846,
+      "sha256": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee"
+    },
+    "model/generation_config.json": {
+      "bytes": 132,
+      "sha256": "87b916edaaab66b3899b9d0dd0752727dff6666686da0504d89ae0a6e055a013"
+    },
+    "model/manifest.json": {
+      "bytes": 5991,
+      "sha256": "d64d4b33ce5b7b5cdc028c734c1be312e5525fba99b48054394eb3ca91700dbd"
+    },
+    "model/stix-expert-q4_0.gguf": {
+      "bytes": 229118528,
+      "sha256": "b6bc4d842fbac3c9edc8c96c689f73ac834c17969adf03ebf75ac19d4d31114d"
+    },
+    "model/tokenizer.json": {
+      "bytes": 2104556,
+      "sha256": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c"
+    },
+    "model/tokenizer_config.json": {
+      "bytes": 3764,
+      "sha256": "4ec77d44f62efeb38d7e044a1db318f6a939438425312dfa333b8382dbad98df"
+    },
+    "prompt.json": {
+      "bytes": 605,
+      "sha256": "c27dab7c2c002ef0e9ba23c793c1381cb866c0fac312e3f73a1188653f65bc32"
+    },
+    "runtime-manifest.json": {
+      "bytes": 543,
+      "sha256": "c21b8b649e67f951935b4e2941e39f98540f063f51fec4899af53e36fc0e691f"
+    },
+    "runtime/flare/flare_web.js": {
+      "bytes": 125369,
+      "sha256": "e242e56eb5b2a5efefe25e5c5f1afa45775a47f575435f5713f0d21083174dc8"
+    },
+    "runtime/flare/flare_web_bg.wasm": {
+      "bytes": 1923307,
+      "sha256": "7b4f95c89a7d25af0372d0d9cc80c61ea92c78ea7876ffeb0875adfc78275be1"
+    },
+    "runtime/knowledge/stix_agent_core.js": {
+      "bytes": 8790,
+      "sha256": "afcc0e9f544b5efa70a6b5dbb7d6be67a71bdd505e720801079ca6112b441816"
+    },
+    "runtime/knowledge/stix_agent_core_bg.wasm": {
+      "bytes": 211921,
+      "sha256": "e70f5b7898a953941ef2dd7189999c6f3ad78036a83800f206ed42257522b9dc"
+    }
+  }
+}
