@@ -98,7 +98,7 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
   function retry() { setPhase('loading'); setFatal(false); setStatus('Loading cached STIX model…'); setEpoch(e => e + 1); }
   return <aside id="stix-agent-panel" role="dialog" aria-modal="false" aria-labelledby="stix-agent-title" className="stix-agent">
     <header className="agent-header">
-      <div><div className="agent-eyebrow">ON THIS DEVICE</div><h2 id="stix-agent-title">STIX assistant <span>2.1</span></h2></div>
+      <div><div className="agent-eyebrow">EXPERIMENTAL · ON THIS DEVICE</div><h2 id="stix-agent-title">STIX assistant <span>2.1</span></h2></div>
       <button ref={closeButton} onClick={onClose} aria-label="Close STIX assistant" title="Close and unload model">✕</button>
     </header>
     <div className="agent-controls">

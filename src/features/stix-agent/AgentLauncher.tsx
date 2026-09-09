@@ -33,7 +33,7 @@ export default function AgentLauncher({ onClose, selectedType }: { onClose: () =
   else if (check.device.reason === 'mobile') explanation = 'Local AI is disabled on phones and tablets for now. Their browser memory limits can terminate the page while loading this model, even on recent devices. Use the assistant on a desktop computer.';
   else if (check.device.reason === 'memory') explanation = `This browser reports approximately ${check.device.memoryGB} GB of device RAM. Local AI is disabled on devices reporting 4 GB or less. Use a desktop with at least 8 GB RAM.`;
   return <aside id="stix-agent-panel" className="stix-agent" role="dialog" aria-modal="false" aria-labelledby="stix-agent-title">
-    <header className="agent-header"><div><div className="agent-eyebrow">ON THIS DEVICE</div><h2 id="stix-agent-title">STIX assistant <span>2.1</span></h2></div><button ref={closeButton} onClick={onClose} aria-label="Close STIX assistant">✕</button></header>
+    <header className="agent-header"><div><div className="agent-eyebrow">EXPERIMENTAL · ON THIS DEVICE</div><h2 id="stix-agent-title">STIX assistant <span>2.1</span></h2></div><button ref={closeButton} onClick={onClose} aria-label="Close STIX assistant">✕</button></header>
     <div className="agent-preflight">
       <h3>{blocked ? 'Local AI unavailable on this device' : check.session === 'interrupted' ? 'Model reload paused' : 'Before loading local AI'}</h3>
       <p role={blocked ? 'alert' : 'status'}>{blocked || check.device.reason === 'unknown' ? explanation : 'Use a desktop with at least 8 GB RAM and close other memory-heavy tabs before loading.'}</p>
