@@ -1,0 +1,3 @@
+# Preserve byte-identical upstream patch and model-card artifacts.
+patches/*.patch -whitespace
+public/stix-agent/MODEL-CARD.md -whitespace

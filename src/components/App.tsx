@@ -7,6 +7,7 @@ import { useFilter } from '../hooks/useFilter';
 import { useUrlType } from '../hooks/useUrlType';
 import { stixObjects } from '../data';
 import type { StixCategory } from '../types/stix';
+import AgentGate from '../features/stix-agent/AgentGate';
 
 export default function App() {
   const { filteredObjects, activeCategories, toggleCategory, search, setSearch } = useFilter();
@@ -23,6 +24,7 @@ export default function App() {
       <FilterBar activeCategories={activeCategories} onToggleCategory={toggleCategory} counts={counts} />
       <CardGrid objects={filteredObjects} onSelectObject={setSelectedObject} />
       <DetailDrawer object={selectedObject} onClose={() => setSelectedObject(null)} />
+      <AgentGate selectedType={selectedObject?.type} />
     </div>
   );
 }
