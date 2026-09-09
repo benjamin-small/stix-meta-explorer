@@ -1,7 +1,7 @@
 import { Component, lazy, Suspense, useRef, useState, type ReactNode } from 'react';
 
 // The gate imports no model, worker, corpus, or WASM. Opening is the only load trigger.
-const AgentPanel = lazy(() => import('./AgentPanel'));
+const AgentLauncher = lazy(() => import('./AgentLauncher'));
 class PanelBoundary extends Component<{ children: ReactNode; onClose: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -22,7 +22,7 @@ export default function AgentGate({ selectedType }: { selectedType?: string }) {
       <span aria-hidden="true">✦ </span>Ask STIX
     </button>
     {open && <PanelBoundary onClose={close}><Suspense fallback={<aside id="stix-agent-panel" aria-label="STIX assistant loading" className="fixed right-0 top-0 z-40 h-dvh w-full max-w-lg bg-cti-surface p-6 text-cti-text shadow-2xl"><button onClick={close} className="float-right">Close</button><p role="status">Opening STIX assistant…</p></aside>}>
-      <AgentPanel onClose={close} selectedType={selectedType} />
+      <AgentLauncher onClose={close} selectedType={selectedType} />
     </Suspense></PanelBoundary>}
   </>;
 }
