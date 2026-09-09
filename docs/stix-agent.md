@@ -39,8 +39,8 @@ This is a Vite build-time flag; changing it requires restarting the dev server o
 
 - Patched Flare at the existing POC's pinned revision runs SmolLM2-360M-Instruct in Rust/WASM, with asynchronous WebGPU decoding and CPU prefill. GPU initialization failure falls back to CPU. The performance panel checks finite logits, GPU-resident weights and GPU KV state after decoding; capability detection alone is not labelled verified decoding.
 - STIX retrieval is a separate Rust/WASM crate, `crates/stix-agent-core`. It ranks object names, aliases, exact property names, relationship direction, and explanatory reference cards. Conversational pronouns can use the previous or currently selected object type.
-- Maximum context is 2,048 tokens, with 256 tokens reserved for the response. Old complete turns are removed before lower-ranked references. Oversized current questions are rejected. ChatML delimiters in questions and references are escaped.
-- Stop terminates the worker immediately, including during synchronous CPU prefill. Resume reloads the cached model; completed turns are supplied again. New chat clears turns and retrieval context. Closing the sidebar also clears the conversation; reopening starts a new chat.
+- Maximum context is 2,048 tokens, with 256 tokens reserved for the response. Conversation history is used only to resolve the subject of follow-up questions; previous generated answers are never replayed into the model. Each generation receives the current question and fresh references. Lower-ranked references are removed if needed. Oversized current questions are rejected. ChatML delimiters in questions and references are escaped.
+- Stop terminates the worker immediately, including during synchronous CPU prefill. Resume reloads the cached model; completed user turns resolve follow-up subjects again. New chat clears turns and retrieval context. Closing the sidebar also clears the conversation; reopening starts a new chat.
 - Model/tokenizer files are SHA-256 checked. All inference assets use same-origin URLs. Prompts are passed only to the local worker; they are not sent to analytics or an LLM service. OASIS links open only when the user follows a reference.
 - No global service worker or changes to the explorer's data stores are introduced. Model caching survives reopening; a fully offline reload of the entire explorer is not guaranteed by this feature.
 
@@ -107,3 +107,9 @@ npm run agent:release:pack -- --tag stix-agent-v0.2.0
 ```
 
 Commit the updated release lock and matching reference/runtime manifests, and publish the resulting `.agent-artifacts/releases/*.zip` to that tag before pushing the enabled deployment workflow to main. Verify from a clean checkout with `agent:release:install`, tests and an enabled build. The pack/install tools use Python 3.11 or newer. Neither tool retrains the model. Reverting the deployment commit restores the previous Pages behavior.
+
+## Conversation repetition regression
+
+The original build replayed previous assistant answers as ChatML history. This caused exact repetitions and invented properties after topic changes, even with the correct current references. The same behavior reproduced in native llama.cpp, so it was not a browser UI or Flare cache problem. The worker now reconstructs subject context from completed user turns and sends only the current question and current evidence to generation. Assistant answers remain in the visible conversation but are never treated as reference evidence.
+
+Run `node scripts/agent/check_conversation.mjs` after installing the release assets to exercise real WASM generation through the same prompt preparation used by the worker. It covers topic changes, missing properties, off-topic questions, pronoun follow-ups and a new chat. This targets conversation isolation; the model can still be incomplete or incorrect on modeling advice.

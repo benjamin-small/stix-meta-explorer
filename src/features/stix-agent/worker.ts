@@ -1,5 +1,5 @@
 import type { Request, Response, Manifest, BundleFile, Retrieval } from './protocol';
-import { boundPrompt } from './prompt';
+import { preparePrompt } from './prompt';
 import { initializeBackend } from './backend';
 import type { FlareEngine, FlareTokenizer, InitOutput } from './runtime/flare_web';
 import type { StixKnowledge } from './runtime/stix_agent_core';
@@ -12,7 +12,7 @@ const tasks: Array<()=>void> = [];
 channel.port1.onmessage = () => tasks.shift()?.();
 const tick = () => new Promise<void>(resolve => {tasks.push(resolve);channel.port2.postMessage(null);});
 let engine: FlareEngine | undefined, tokenizer: FlareTokenizer | undefined, graph: StixKnowledge | undefined;
-let wasm: InitOutput, manifest: Manifest, system = '', previous: string[] = [];
+let wasm: InitOutput, manifest: Manifest, system = '';
 let active = '', cancelled = false, busy = false;
 let diagnostic = '';
 const consoleError = console.error.bind(console);
@@ -65,7 +65,7 @@ async function loadFile(entry: BundleFile, base: string, files: File[] | undefin
   return {bytes,cached};
 }
 async function initialize(r: Extract<Request,{type:'init'}>) {
-  engine?.free(); tokenizer?.free(); engine=undefined; tokenizer=undefined; previous=[];
+  engine?.free(); tokenizer?.free(); engine=undefined; tokenizer=undefined;
   const base=localUrl(r.manifestUrl, location.href);
   const manifestResponse = r.files ? undefined : await fetch(base).catch(()=>caches.match(base));
   const source = r.files ? await r.files.find(f=>f.name==='manifest.json')?.text() : await (manifestResponse?.ok ? manifestResponse : await caches.match(base))?.text();
@@ -107,15 +107,9 @@ async function initialize(r: Extract<Request,{type:'init'}>) {
 async function generate(r: Extract<Request,{type:'generate'}>) {
   if(!engine || !tokenizer || !graph) throw new Error('Load a model and a valid graph before sending a message.');
   if(!r.text.trim() || r.text.length>16000) throw new Error('Enter a question under 16,000 characters.');
-  let context=previous;
-  // Worker termination releases the model. Reconstruct retrieval context from
-  // completed user turns when resuming, before resolving a pronoun follow-up.
-  if(!context.length) for(const message of r.history) if(message.role==='user') {
-    context=(JSON.parse(graph.retrieve(message.content,JSON.stringify(context))) as Retrieval).entityIds;
-  }
-  if(!context.length && r.selectedType) context=[r.selectedType];
-  const found: Retrieval=JSON.parse(graph.retrieve(r.text,JSON.stringify(context)));
-  const bounded=boundPrompt(system,r.history,r.text,found,s=>tokenizer!.encode(s));
+  const bounded=preparePrompt(system,r.history,r.text,r.selectedType,
+    (question,previous)=>JSON.parse(graph!.retrieve(question,JSON.stringify(previous))) as Retrieval,
+    s=>tokenizer!.encode(s));
   send({type:'evidence',id:r.id,retrieval:bounded.retrieval,inputTokens:bounded.ids.length,droppedTurns:bounded.droppedTurns});
   engine.reset(); engine.set_rng_seed(42);
   const started=performance.now(); let first: number|null=null, text='', gpuDecodeVerified=false;
@@ -135,7 +129,6 @@ async function generate(r: Extract<Request,{type:'generate'}>) {
     send({type:'chunk',id:r.id,text});
   }
   const total=performance.now()-started;
-  if(!cancelled && text) previous=found.entityIds;
   send({type:'complete',id:r.id,text,metrics:{inputTokens:bounded.ids.length,outputTokens:output.length,firstTokenMs:first,totalMs:total,tokensPerSecond:output.length>1?(output.length-1)/((total-(first??0))/1000):0,droppedTurns:bounded.droppedTurns,droppedFacts:bounded.droppedFacts,backend:JSON.parse(engine.backend_info()),gpuDecodeVerified,wasmMemoryBytes:wasm.memory.buffer.byteLength,modelBytes:manifest.files.weights.bytes,stopReason:cancelled?'cancelled':engine.stream_stop_reason}});
 }
 self.onmessage=async ({data:r}:MessageEvent<Request>)=>{
@@ -146,7 +139,7 @@ self.onmessage=async ({data:r}:MessageEvent<Request>)=>{
     switch(r.type) {
       case 'init': await initialize(r);break;
       case 'generate': await generate(r);break;
-      case 'reset': engine?.reset();previous=[];send({type:'reset',id:r.id});break;
+      case 'reset': engine?.reset();send({type:'reset',id:r.id});break;
     }
   } catch(error) {
     const fatal = r.type==='init' || error instanceof WebAssembly.RuntimeError || /invalid logits/i.test(String(error));

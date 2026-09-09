@@ -18,7 +18,7 @@ const ragRows=json('.agent-artifacts/evaluation/q4_0-retrieval.json').results;
 for (const name of ['q4_0','q4_0-retrieval']) for (const row of json(`.agent-artifacts/evaluation/${name}.json`).results) {
   const found=JSON.parse(knowledge.retrieve(row.case.question,'[]'));
   if(name==='q4_0')found.facts=[];
-  const bounded=boundPrompt(system,[],row.case.question,found,s=>tokenizer.encode(s));
+  const bounded=boundPrompt(system,row.case.question,found,s=>tokenizer.encode(s));
   assert.deepEqual(bounded.retrieval.facts,row.evidence,`${row.case.id}: reference parity`);
   assert.deepEqual([...bounded.ids],row.inputTokens,`${row.case.id}: template/token parity`);
   prompts++; tokens+=bounded.ids.length;
