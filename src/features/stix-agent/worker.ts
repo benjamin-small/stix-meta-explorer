@@ -1,6 +1,7 @@
 import type { Request, Response, Manifest, BundleFile, Retrieval } from './protocol';
 import { preparePrompt } from './prompt';
 import { initializeBackend } from './backend';
+import { isMemoryFailure } from './runtime-errors';
 import type { FlareEngine, FlareTokenizer, InitOutput } from './runtime/flare_web';
 import type { StixKnowledge } from './runtime/stix_agent_core';
 
@@ -142,7 +143,9 @@ self.onmessage=async ({data:r}:MessageEvent<Request>)=>{
       case 'reset': engine?.reset();send({type:'reset',id:r.id});break;
     }
   } catch(error) {
-    const fatal = r.type==='init' || error instanceof WebAssembly.RuntimeError || /invalid logits/i.test(String(error));
-    send({type:'error',id:r.id,message:String(error)+(fatal&&diagnostic?' '+diagnostic:'')+(fatal?' Retry loading the model. If WebGPU fails, select CPU / WASM.':''),fatal});
+    const memoryFailure = isMemoryFailure(error);
+    const fatal = memoryFailure || r.type==='init' || error instanceof WebAssembly.RuntimeError || /invalid logits/i.test(String(error));
+    const help = memoryFailure ? ' The model could not allocate enough memory. Close other tabs or use another computer. CPU mode still loads the same large model.' : fatal ? ' Retry loading the model. If WebGPU fails, select CPU / WASM.' : '';
+    send({type:'error',id:r.id,message:String(error)+(fatal&&diagnostic?' '+diagnostic:'')+help,fatal});
   } finally {busy=false;active='';}
 };

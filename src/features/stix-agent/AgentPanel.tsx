@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Evidence, Metrics, Request, Response } from './protocol';
 import type { Message } from './prompt';
+import { startRuntimeSession } from './availability';
 import './agent.css';
 
 type Turn = { id: string; question: string; answer: string; evidence: Evidence[]; metrics?: Metrics; complete: boolean };
@@ -19,6 +20,7 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
   const [warning, setWarning] = useState('');
   const [fatal, setFatal] = useState(false);
   const worker = useRef<Worker | null>(null);
+  const releaseWorker = useRef<(() => void) | null>(null);
   const active = useRef('');
   const end = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -40,8 +42,24 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
       queueMicrotask(() => { setPhase('error'); setFatal(true); setStatus('Open this site through HTTPS or a localhost SSH tunnel to enable browser inference.'); });
       return;
     }
-    const instance = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module', name: 'stix-agent' });
+    const clearSession = startRuntimeSession();
+    let instance: Worker;
+    try { instance = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module', name: 'stix-agent' }); }
+    catch (error) {
+      clearSession();
+      queueMicrotask(() => { setPhase('error'); setFatal(true); setStatus(`Could not start the local runtime: ${String(error)}. Close other tabs or use another computer.`); });
+      return;
+    }
     worker.current = instance;
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      instance.terminate(); clearSession();
+      if (worker.current === instance) worker.current = null;
+      if (releaseWorker.current === release) releaseWorker.current = null;
+    };
+    releaseWorker.current = release;
     instance.onmessage = ({ data: message }: MessageEvent<Response>) => {
       if (worker.current !== instance) return;
       if (message.type === 'progress') { setStatus(message.message); setPercent(message.percent); }
@@ -57,11 +75,11 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
         setTurns(t => t.map(turn => turn.id === message.id ? { ...turn, answer: message.text, metrics: message.metrics, complete: message.metrics.stopReason !== 'cancelled' } : turn));
         setPhase('ready'); setStatus('Ready for your next STIX question.'); active.current = '';
       }
-      if (message.type === 'error') { setPhase(message.fatal ? 'error' : 'ready'); setStatus(message.message); setFatal(message.fatal); active.current = ''; }
+      if (message.type === 'error') { if (message.fatal) { release(); setBackend('Unloaded'); } setPhase(message.fatal ? 'error' : 'ready'); setStatus(message.message); setFatal(message.fatal); active.current = ''; }
     };
-    instance.onerror = event => { if (worker.current === instance) { setPhase('error'); setFatal(true); setStatus(`The local runtime stopped: ${event.message || 'worker unavailable'}. Retry, or choose CPU / WASM.`); } };
+    instance.onerror = event => { if (worker.current === instance) { release(); setBackend('Unloaded'); setPhase('error'); setFatal(true); setStatus(`The local runtime stopped: ${event.message || 'worker unavailable'}. Close other tabs or use another computer before retrying. CPU mode still needs substantial memory.`); } };
     instance.postMessage({ type: 'init', id: 'init', manifestUrl: new URL(import.meta.env.BASE_URL + 'stix-agent/model/manifest.json', location.origin).href, backend: preference } satisfies Request);
-    return () => { instance.terminate(); if (worker.current === instance) worker.current = null; };
+    return release;
   }, [epoch, preference]);
   function send(text = draft) {
     if (phase !== 'ready' || !text.trim() || !worker.current) return;
@@ -74,7 +92,7 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
   function stop() {
     // CPU prefill cannot process a cancel message until it yields. Termination also
     // stops a stalled GPU driver call and releases the entire worker-owned model.
-    worker.current?.terminate(); worker.current = null; active.current = '';
+    releaseWorker.current?.(); active.current = '';
     setPhase('stopped'); setStatus('Stopped. Resume to reload the cached model and continue.'); setBackend('Unloaded');
   }
   function retry() { setPhase('loading'); setFatal(false); setStatus('Loading cached STIX model…'); setEpoch(e => e + 1); }
@@ -93,7 +111,7 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
     </div>
     {warning && <p className="agent-warning">{warning}</p>}
     <div className="agent-conversation" aria-label="STIX conversation">
-      {turns.length === 0 && <div className="agent-welcome"><div className="agent-star" aria-hidden="true">✦</div><h3>Your STIX reference, in conversation.</h3><p>Ask about object properties, relationships, and modeling rules. Answers include the OASIS references supplied to the local model.</p><p className="agent-note">First opening downloads about 233 MB. Closing releases the model from memory.</p><div className="agent-presets">{presets.map(q => <button key={q} disabled={phase !== 'ready'} onClick={() => send(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
+      {turns.length === 0 && <div className="agent-welcome"><div className="agent-star" aria-hidden="true">✦</div><h3>Your STIX reference, in conversation.</h3><p>Ask about object properties, relationships, and modeling rules. Answers include the OASIS references supplied to the local model.</p><p className="agent-note">First opening downloads about 233 MB. Running the model has used about 1.9 GB of WASM memory, plus GPU and browser memory. Closing releases the model.</p><div className="agent-presets">{presets.map(q => <button key={q} disabled={phase !== 'ready'} onClick={() => send(q)}>{q}<span aria-hidden="true">↗</span></button>)}</div></div>}
       {turns.map((turn, index) => <article key={turn.id} className="agent-turn"><p className="agent-question">{turn.question}</p><div className="agent-answer">{turn.answer || (phase === 'generating' && index === turns.length - 1 ? 'Thinking…' : 'No response generated.')}</div>
         {(turn.evidence.length > 0 || turn.metrics) && <details><summary>References & performance</summary>{turn.evidence.map(f => <div className="agent-reference" key={f.id}><a href={f.source} target="_blank" rel="noreferrer">[{f.id}] {f.title} ↗</a><p>{f.text}</p></div>)}{turn.metrics && <p className="agent-metrics">{turn.metrics.inputTokens} input · {turn.metrics.outputTokens} output tokens · {((turn.metrics.firstTokenMs || 0) / 1000).toFixed(2)}s first token · {turn.metrics.tokensPerSecond.toFixed(1)} tokens/s · {(turn.metrics.wasmMemoryBytes / 1e6).toFixed(0)} MB WASM heap{turn.metrics.gpuDecodeVerified ? ' · GPU decoding verified' : ''}{turn.metrics.droppedTurns + turn.metrics.droppedFacts > 0 ? ` · Context trimmed (${turn.metrics.droppedTurns} turns, ${turn.metrics.droppedFacts} references)` : ''}</p>}</details>}
       </article>)}<div ref={end} />

@@ -1,6 +1,6 @@
 # Optional local STIX assistant
 
-The assistant is isolated in `src/features/stix-agent`, with one integration point in `App.tsx`. `VITE_STIX_AGENT=true` enables the **Ask STIX** edge tab. The default is disabled. Opening the tab dynamically imports the panel and starts its dedicated worker; no model, corpus, WASM, GPU allocation, or inference worker is started beforehand. Closing the panel terminates the worker and releases its model resources. Verified model files remain in the browser's `stix-agent-models-v1` cache for reopening.
+The assistant is isolated in `src/features/stix-agent`, with one integration point in `App.tsx`. `VITE_STIX_AGENT=true` enables the **Ask STIX** edge tab. The default is disabled. Opening the tab dynamically imports a lightweight device preflight. It starts the inference panel and dedicated worker only when the device policy permits it; no model, corpus, WASM, GPU allocation, or inference worker is started beforehand. Closing the panel terminates the worker and releases its model resources. Verified model files remain in the browser's `stix-agent-models-v1` cache for reopening.
 
 ## Start the installed local prototype
 
@@ -34,6 +34,21 @@ npm run preview -- --host 127.0.0.1
 ```
 
 This is a Vite build-time flag; changing it requires restarting the dev server or rebuilding. `.env.development.local` affects development only. The GitHub Pages workflow explicitly enables the flag after installing the pinned prebuilt release. Ordinary builds still default to disabled. All URLs respect the existing `/stix-meta-explorer/` base path. A host that enables the feature must also serve the generated model/runtime assets at that path. The flag is a product toggle, not an access-control mechanism.
+
+## Memory requirements and mobile protection
+
+The current model has used about 1.9 GB of WASM memory on desktop, before additional GPU buffers, JavaScript allocations, and browser overhead. Its 233 MB download is not its working memory requirement. CPU mode still loads the same large model.
+
+The lightweight preflight runs before importing the inference panel or creating its worker:
+
+- Phones and tablets are blocked for this model, including iPhone browsers, Android, and iPadOS reporting a desktop Mac identity with touch support. The sidebar explains the limitation and returns users to the ordinary explorer.
+- Desktops reporting 4 GB of RAM or less through `navigator.deviceMemory` are blocked. At least 8 GB device RAM is recommended; this is a conservative product policy, not a measured minimum or guarantee of available memory.
+- Desktops without that API require an explicit **Load desktop model** action after displaying the requirements. Missing, invalid, or zero memory values are treated as unknown, not as safe.
+- A per-tab session marker is written before model startup and kept through inference. After an interrupted session, reopening the sidebar requires explicit loading even on an otherwise supported desktop. A normal page refresh can also leave the marker; it does not prove a crash. Stop, close, and handled fatal errors terminate the worker and clear its marker. If storage is unavailable, each opening requires explicit loading.
+
+[`deviceMemory`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/deviceMemory) reports coarse, privacy-limited **total device RAM**, not currently free RAM or the browser tab's allocation limit, and is not available in every browser. There is no portable preflight that can guarantee an allocation will succeed. Device detection can miss spoofed or reduced identities. A hard renderer/OS termination cannot be caught by JavaScript; the preflight and reload guard reduce exposure, while catchable runtime errors now release the worker immediately. No artificial large-allocation probe is used.
+
+This release prevents the unsupported mobile model load; it does not add mobile inference or a reference-only chatbot. The main STIX object explorer and its search remain available.
 
 ## Runtime and isolation
 
