@@ -98,3 +98,13 @@ Reproduction commands are in [stix-agent.md](stix-agent.md). Detailed local outp
 - `.agent-artifacts/bundles/q4_0` and `q8_0`: portable model bundles; `public/stix-agent/model` is the installed Q4 bundle.
 
 The measurements above were recorded before publication. The subsequent Pages deployment packages these same validated model/runtime bytes in the `stix-agent-v0.1.0` release and enables the sidebar in the Pages workflow. Flare upstream publication is separate and was not performed.
+
+## Conversation isolation fix
+
+The first public release had a multi-turn failure missed by the single-question quality suite: after the malware-family name question, the Note/Location modeling question repeated the malware answer. The same input reproduced in native llama.cpp. Removing previous assistant answers from the input stopped the repeat with identical current references and model weights. History also caused an invented secret_access_token property in the control test; the isolated current prompt correctly abstained.
+
+The worker now uses completed user turns only to resolve the subject for retrieval. Each generation gets fresh evidence and the current question. This preserves subject-based follow-ups and prevents replay of previous generated answers. Full conversation reasoning across prior answers is not claimed.
+
+Validation after the fix: 78 UI/TypeScript tests, lint and the enabled build passed. `node scripts/agent/check_conversation.mjs` passed eight sequential cases using the actual shipped WASM model: malware name, the Note topic change, an unknown property, a known question after that unknown, a pronoun property follow-up, a missing pronoun property, an off-topic question and a fresh chat. Detailed output is in `.agent-artifacts/evaluation/conversation-regression.json`; the native history-versus-isolated control is in `history-control.json`. The model, tokenizer, reference corpus and WASM release hashes are unchanged.
+
+The Note response now explains the Note reference instead of repeating malware facts; it is still an incomplete answer to the broader modeling decision about attack location. These are regression checks for conversation isolation, not a new broad accuracy benchmark.
