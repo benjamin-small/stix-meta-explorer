@@ -1,6 +1,6 @@
 # Optional local STIX assistant
 
-The assistant is isolated in `src/features/stix-agent`, with one integration point in `App.tsx`. `VITE_STIX_AGENT=true` enables the **Ask STIX** edge tab. The default is disabled. Opening the tab dynamically imports a lightweight device preflight. It starts the inference panel and dedicated worker only when the device policy permits it; no model, corpus, WASM, GPU allocation, or inference worker is started beforehand. Closing the panel terminates the worker and releases its model resources. Verified model files remain in the browser's `stix-agent-models-v1` cache for reopening.
+The experimental assistant is isolated in `src/features/stix-agent`, with one integration point in `App.tsx`. `VITE_STIX_AGENT=true` enables the **Ask STIX** edge tab. The default is disabled. Opening the tab dynamically imports a lightweight device preflight. It starts the inference panel and dedicated worker only when the device policy permits it; no model, corpus, WASM, GPU allocation, or inference worker is started beforehand. Closing the panel terminates the worker and releases its model resources. Verified model files remain in the browser's `stix-agent-models-v1` cache for reopening.
 
 ## Start the installed local prototype
 
