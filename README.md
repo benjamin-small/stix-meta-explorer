@@ -42,5 +42,8 @@ npm run build
 Run tests:
 
 ```bash
-npx vitest run
+npm test
+npm run coverage
 ```
+
+The application requires no environment variables. See [docs/configuration.md](docs/configuration.md) for build and deployment configuration, [docs/testing.md](docs/testing.md) for measured coverage and test scope, and [docs/licensing.md](docs/licensing.md) for the current licensing status.

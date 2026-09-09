@@ -1,4 +1,4 @@
-import type { StixObjectType, StixCategory } from '../stix';
+import type { StixCategory, StixObjectType } from '../stix';
 
 test('StixObjectType interface accepts valid object', () => {
   const obj: StixObjectType = {
