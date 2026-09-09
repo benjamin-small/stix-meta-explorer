@@ -23,3 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 .superpowers
+
+# Optional local STIX assistant artifacts
+.agent-cache/
+.agent-artifacts/
+.agent-venv
+crates/stix-agent-core/target/
+public/stix-agent/runtime/
+public/stix-agent/model/
+__pycache__/

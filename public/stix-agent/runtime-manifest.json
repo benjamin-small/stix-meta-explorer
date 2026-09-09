@@ -1,0 +1,9 @@
+{
+  "modelSha256": "b6bc4d842fbac3c9edc8c96c689f73ac834c17969adf03ebf75ac19d4d31114d",
+  "files": {
+    "runtime/knowledge/stix_agent_core.js": "afcc0e9f544b5efa70a6b5dbb7d6be67a71bdd505e720801079ca6112b441816",
+    "runtime/knowledge/stix_agent_core_bg.wasm": "e70f5b7898a953941ef2dd7189999c6f3ad78036a83800f206ed42257522b9dc",
+    "runtime/flare/flare_web.js": "e242e56eb5b2a5efefe25e5c5f1afa45775a47f575435f5713f0d21083174dc8",
+    "runtime/flare/flare_web_bg.wasm": "7b4f95c89a7d25af0372d0d9cc80c61ea92c78ea7876ffeb0875adfc78275be1"
+  }
+}

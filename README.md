@@ -22,6 +22,10 @@ STIX (Structured Threat Information Expression) is an open standard for represen
 
 React, TypeScript, Vite, Tailwind CSS, D3
 
+## Optional browser STIX assistant
+
+An isolated, feature-flagged sidebar can answer STIX 2.1 questions using a locally fine-tuned SmolLM2 model, Rust/WASM retrieval, and WebGPU. Set `VITE_STIX_AGENT=true` in `.env.development.local` to enable **Ask STIX**. The model loads only when the sidebar opens; closing it releases the worker and model memory. See [setup, training, and runtime documentation](docs/stix-agent.md) and [measured validation](docs/stix-agent-validation.md).
+
 ## Development
 
 ```bash

@@ -1,0 +1,13 @@
+{
+  "flare": "a8cb07cf54fa43c4e41664316498ed195fa7b018",
+  "llama_cpp": "f3f1a8f2760f28325a5ec20c05b171e5b7c83a29",
+  "model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "model_revision": "a10cc1512eabd3dde888204e902eca88bddb4951",
+  "gguf_repository": "HuggingFaceTB/SmolLM2-360M-Instruct-GGUF",
+  "gguf_revision": "593b5a2e04c8f3e4ee880263f93e0bd2901ad47f",
+  "gguf_file": "smollm2-360m-instruct-q8_0.gguf",
+  "specification_sha256": "e4e8114859560ab8e7de772b737dfdaafc7db38d786aed02d2645dd448a4cf18",
+  "schema_revision": "c4f8d589acf2bdb3783655c89e0ffb6e150006ae",
+  "schema_archive_sha256": "1f93b6525a7e437508a78109873290f798592f53da359a5c25304cfcdc8c52ee",
+  "flare_patch_sha256": "b50f6a694c85e2a74c8a4b9a7690ffa103db01d85eb8014a47e4a373f360b3e4"
+}

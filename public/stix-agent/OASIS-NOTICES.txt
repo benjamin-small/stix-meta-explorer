@@ -1,0 +1,647 @@
+Copyright © OASIS Open 2022. All Rights Reserved.
+
+Copyright © OASIS Open 2022. All Rights Reserved.
+
+All capitalized terms in the following text have the meanings assigned to them in the OASIS Intellectual Property Rights Policy (the "OASIS IPR Policy"). The full Policy may be found at the OASIS website.
+
+This document and translations of it may be copied and furnished to others, and derivative works that comment on or otherwise explain it or assist in its implementation may be prepared, copied, published, and distributed, in whole or in part, without restriction of any kind, provided that the above copyright notice and this section are included on all such copies and derivative works. However, this document itself may not be modified in any way, including by removing the copyright notice or references to OASIS, except as needed for the purpose of developing any document or deliverable produced by an OASIS Technical Committee (in which case the rules applicable to copyrights, as set forth in the OASIS IPR Policy, must be followed) or as required to translate it into languages other than English.
+
+The limited permissions granted above are perpetual and will not be revoked by OASIS or its successors or assigns.
+
+This document and the information contained herein is provided on an "AS IS" basis and OASIS DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY OWNERSHIP RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+OASIS requests that any OASIS Party or any other party that believes it has patent claims that would necessarily be infringed by implementations of this OASIS Committee Specification or OASIS Standard, to notify OASIS TC Administrator and provide an indication of its willingness to grant patent licenses to such patent claims in a manner consistent with the IPR Mode of the OASIS Technical Committee that produced this specification.
+
+OASIS invites any party to contact the OASIS TC Administrator if it is aware of a claim of ownership of any patent claims that would necessarily be infringed by implementations of this specification by a patent holder that is not willing to provide a license to such patent claims in a manner consistent with the IPR Mode of the OASIS Technical Committee that produced this specification. OASIS may include such claims on its website, but disclaims any obligation to do so.
+
+OASIS takes no position regarding the validity or scope of any intellectual property or other rights that might be claimed to pertain to the implementation or use of the technology described in this document or the extent to which any license under such rights might or might not be available; neither does it represent that it has made any effort to identify any such rights. Information on OASIS' procedures with respect to rights in any document or deliverable produced by an OASIS Technical Committee can be found on the OASIS website. Copies of claims of rights made available for publication and any assurances of licenses to be made available, or the result of an attempt made to obtain a general license or permission for the use of such proprietary rights by implementers or users of this OASIS Committee Specification or OASIS Standard, can be obtained from the OASIS TC Administrator. OASIS makes no representation that any information or list of intellectual property rights will at any time be complete, or that any claims in such list are, in fact, Essential Claims.
+
+The name "OASIS" is a trademark of OASIS , the owner and developer of this specification, and should be used only to refer to the organization and its official outputs. OASIS welcomes reference to, and implementation and use of, specifications, while reserving the right to enforce its marks against misleading uses. Please see https://www.oasis-open.org/policies-guidelines/trademark/ for above guidance.
+
+Portions copyright © United States Government 2012-2022. All Rights Reserved.
+
+STIX, CYBOX, AND TAXII (STANDARD OR STANDARDS) AND THEIR COMPONENT PARTS ARE PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTY THAT THESE STANDARDS OR ANY OF THEIR COMPONENT PARTS WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT THE STANDARDS OR THEIR COMPONENT PARTS WILL BE ERROR FREE, OR ANY WARRANTY THAT THE DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE STANDARDS OR THEIR COMPONENT PARTS. IN NO EVENT SHALL THE UNITED STATES GOVERNMENT OR ITS CONTRACTORS OR SUBCONTRACTORS BE LIABLE FOR ANY DAMAGES, INCLUDING, BUT NOT LIMITED TO, DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF, RESULTING FROM, OR IN ANY WAY CONNECTED WITH THESE STANDARDS OR THEIR COMPONENT PARTS OR ANY PROVIDED DOCUMENTATION, WHETHER OR NOT BASED UPON WARRANTY, CONTRACT, TORT, OR OTHERWISE, WHETHER OR NOT INJURY WAS SUSTAINED BY PERSONS OR PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT OF THE RESULTS OF, OR USE OF, THE STANDARDS, THEIR COMPONENT PARTS, AND ANY PROVIDED DOCUMENTATION. THE UNITED STATES GOVERNMENT DISCLAIMS ALL WARRANTIES AND LIABILITIES REGARDING THE STANDARDS OR THEIR COMPONENT PARTS ATTRIBUTABLE TO ANY THIRD PARTY, IF PRESENT IN THE STANDARDS OR THEIR COMPONENT PARTS AND DISTRIBUTES IT OR THEM "AS IS."
+
+Table of Contents
+
+1 Introduction 14
+
+1.1 Document Conventions 14
+
+1.2 Overview 14
+
+1.2.1 Graph-Based Model 15
+
+1.2.2 STIX Domain Objects 15
+
+1.2.3 STIX Cyber-observable Objects 15
+
+1.2.4 STIX Relationships 16
+
+1.2.5 STIX Cyber Observable Observed Data Relationships (Deprecated) 17
+
+1.2.6 STIX Patterning 17
+
+1.2.7 STIX Patterning ANTLR Grammar 17
+
+1.2.8 STIX Common Properties 18
+
+1.2.9 STIX Open Vocabularies and Enumerations 18
+
+1.2.10 Reserved Names 18
+
+1.2.11 Serialization 18
+
+1.2.12 Transporting STIX 18
+
+1.2.13 JSON Schemas 18
+
+1.3 Changes From Earlier Versions 19
+
+1.3.1 STIX 2.1 Major Changes and Additions 19
+
+1.4 Glossary 19
+
+2 Common Data Types 21
+
+2.1 Binary 22
+
+2.2 Boolean 22
+
+2.3 Dictionary 22
+
+2.4 Enum 22
+
+2.5 External Reference 23
+
+2.5.1 Properties 23
+
+2.5.2 Requirements 24
+
+2.6 Float 25
+
+2.7 Hashes 26
+
+2.8 Hexadecimal 26
+
+2.9 Identifier 26
+
+2.10 Integer 28
+
+2.11 Kill Chain Phase 29
+
+2.12 List 30
+
+2.13 Observable Container (deprecated) 30
+
+2.14 Open Vocabulary 31
+
+2.15 String 32
+
+2.16 Timestamp 33
+
+2.16.1 Requirements 33
+
+3 STIX General Concepts 34
+
+3.1 Property Names and String Literals 34
+
+3.2 Common Properties 34
+
+3.3 Object IDs and References 39
+
+3.4 SCO Deterministic ID Creation 40
+
+3.5 Object Creator 40
+
+3.6 Versioning 40
+
+3.6.1 Versioning Timestamps 41
+
+3.6.2 New Version or New Object? 41
+
+3.7 Common Relationships 45
+
+3.8 Reserved Names 46
+
+3.9 Object Property Metadata 47
+
+3.9.1 SCO String Encoding 47
+
+3.10 Predefined Object Extensions 47
+
+4 STIX Domain Objects 49
+
+4.1 Attack Pattern 49
+
+4.1.1 Properties 49
+
+4.1.2 Relationships 50
+
+4.2 Campaign 53
+
+4.2.1 Properties 53
+
+4.2.2 Relationships 55
+
+4.3 Course of Action 57
+
+4.3.1 Properties 57
+
+4.3.2 Relationships 58
+
+4.4 Grouping 60
+
+4.4.1 Properties 60
+
+4.4.2 Relationships 61
+
+4.5 Identity 62
+
+4.5.1 Properties 62
+
+4.5.2 Relationships 63
+
+4.6 Incident 65
+
+4.6.1 Properties 65
+
+4.6.2 Relationships 65
+
+4.7 Indicator 66
+
+4.7.1 Properties 67
+
+4.7.2 Relationships 69
+
+4.8 Infrastructure 71
+
+4.8.1 Properties 71
+
+4.8.2 Relationships 72
+
+4.9 Intrusion Set 77
+
+4.9.1 Properties 77
+
+4.9.2 Relationships 79
+
+4.10 Location 82
+
+4.10.1 Properties 83
+
+4.10.2 Relationships 84
+
+4.11 Malware 86
+
+4.11.1 Properties 87
+
+4.11.2 Relationships 89
+
+4.12 Malware Analysis 94
+
+4.12.1 Properties 94
+
+4.12.2 Relationships 97
+
+4.13 Note 99
+
+4.13.1 Properties 99
+
+4.13.2 Relationships 100
+
+4.14 Observed Data 101
+
+4.14.1 Properties 102
+
+4.14.2 Relationships 104
+
+4.15 Opinion 105
+
+4.15.1 Properties 106
+
+4.15.2 Relationships 106
+
+4.16 Report 107
+
+4.16.1 Properties 108
+
+4.16.2 Relationships 109
+
+4.17 Threat Actor 111
+
+4.17.1 Properties 111
+
+4.17.2 Relationships 114
+
+4.18 Tool 117
+
+4.18.1 Properties 117
+
+4.18.2 Relationships 118
+
+4.19 Vulnerability 120
+
+4.19.1 Properties 120
+
+4.19.2 Relationships 121
+
+5 STIX Relationship Objects 123
+
+5.1 Relationship 123
+
+5.1.1 Specification-Defined Relationships Summary 123
+
+5.1.2 Properties 124
+
+5.1.3 Relationships 125
+
+5.2 Sighting 126
+
+5.2.1 Properties 126
+
+5.2.2 Relationships 129
+
+6 STIX Cyber-observable Objects 131
+
+6.1 Artifact Object 131
+
+6.1.1 Properties 131
+
+6.2 Autonomous System (AS) Object 133
+
+6.2.1 Properties 133
+
+6.3 Directory Object 134
+
+6.3.1 Properties 134
+
+6.4 Domain Name Object 135
+
+6.4.1 Properties 135
+
+6.4.2 Relationships 136
+
+6.5 Email Address Object 137
+
+6.5.1 Properties 137
+
+6.6 Email Message Object 138
+
+6.6.1 Properties 138
+
+6.6.2 Email MIME Component Type 141
+
+6.6.2.1 Properties 141
+
+6.7 File Object 145
+
+6.7.1 Properties 145
+
+6.7.2 Archive File Extension 148
+
+6.7.2.1 Properties 148
+
+6.7.3 NTFS File Extension 149
+
+6.7.3.1 Properties 150
+
+6.7.3.2 Alternate Data Stream Type 150
+
+6.7.3.2.1 Properties 150
+
+6.7.4 PDF File Extension 151
+
+6.7.4.1 Properties 151
+
+6.7.5 Raster Image File Extension 152
+
+6.7.5.1 Properties 152
+
+6.7.6 Windows™ PE Binary File Extension 153
+
+6.7.6.1 Properties 153
+
+6.7.6.2 Windows™ PE Optional Header Type 154
+
+6.7.6.2.1 Properties 154
+
+6.7.6.3 Windows™ PE Section Type 157
+
+6.7.6.3.1 Properties 157
+
+6.8 IPv4 Address Object 159
+
+6.8.1 Properties 159
+
+6.8.2 Relationships 160
+
+6.9 IPv6 Address Object 160
+
+6.9.1 Properties 161
+
+6.9.2 Relationships 161
+
+6.10 MAC Address Object 162
+
+6.10.1 Properties 162
+
+6.11 Mutex Object 163
+
+6.11.1 Properties 163
+
+6.12 Network Traffic Object 164
+
+6.12.1 Properties 164
+
+6.12.2 HTTP Request Extension 171
+
+6.12.2.1 Properties 171
+
+6.12.3 ICMP Extension 173
+
+6.12.3.1 Properties 173
+
+6.12.4 Network Socket Extension 174
+
+6.12.4.1 Properties 174
+
+6.12.5 TCP Extension 175
+
+6.12.5.1 Properties 176
+
+6.13 Process Object 177
+
+6.13.1 Properties 177
+
+6.13.2 Windows™ Process Extension 179
+
+6.13.2.1 Properties 179
+
+6.13.3 Windows™ Service Extension 180
+
+6.13.3.1 Properties 181
+
+6.14 Software Object 182
+
+6.14.1 Properties 182
+
+6.15 URL Object 183
+
+6.15.1 Properties 184
+
+6.16 User Account Object 184
+
+6.16.1 Properties 185
+
+6.16.2 UNIX™ Account Extension 187
+
+6.16.2.1 Properties 187
+
+6.17 Windows™ Registry Key Object 188
+
+6.17.1 Properties 188
+
+6.17.2 Windows™ Registry Value Type 189
+
+6.17.2.1 Properties 189
+
+6.18 X.509 Certificate Object 190
+
+6.18.1 Properties 191
+
+6.18.2 X.509 v3 Extensions Type 192
+
+6.18.2.1 Properties 192
+
+7 STIX Meta Objects 196
+
+7.1 Language Content 196
+
+7.1.1 Properties 196
+
+7.1.2 Relationships 198
+
+7.2 Data Markings 199
+
+7.2.1 Marking Definition 200
+
+7.2.1.1 Properties 200
+
+7.2.1.2 Relationships 201
+
+7.2.1.3 Statement Marking Object Type 202
+
+7.2.1.4 TLP Marking Object Type 202
+
+7.2.2 Object Markings 204
+
+7.2.3 Granular Markings 204
+
+7.2.3.1 Granular Marking Type 204
+
+7.3 Extension Definition 207
+
+7.3.1 Extension Definition Properties 209
+
+7.3.2 Requirements for STIX Extension Schemas 210
+
+7.3.2.1 Requirements for Extension Properties 210
+
+7.3.2.2 Requirements for Extension STIX Objects 210
+
+8 STIX Bundle Object 215
+
+8.1 Properties 215
+
+8.2 Relationships 215
+
+9 STIX Patterning 217
+
+9.1 Definitions 217
+
+9.2 Constants 219
+
+9.3 STIX Patterns 221
+
+9.4 Pattern Expressions 222
+
+9.5 Observation Expressions 222
+
+9.5.1 Observation Expression Qualifiers 224
+
+9.5.2 Observation Operators 225
+
+9.5.3 Operator Precedence 226
+
+9.6 Comparison Expressions 226
+
+9.6.1 Comparison Operators 227
+
+9.6.2 String Comparison 229
+
+9.6.3 Binary Type Comparison 229
+
+9.6.4 Native Format Comparison 230
+
+9.7 Object Path Syntax 230
+
+9.7.1 Basic Object Properties 231
+
+9.7.2 List Object Properties 231
+
+9.7.3 Dictionary Object Properties 232
+
+9.7.4 Object Reference Properties 232
+
+9.8 Examples 233
+
+10 STIX Vocabularies 235
+
+10.1 Account Type Vocabulary 235
+
+10.2 Attack Motivation Vocabulary 236
+
+10.3 Attack Resource Level Vocabulary 238
+
+10.4 Encryption Algorithm Enumeration 239
+
+10.5 Extension Types Enumeration 240
+
+10.6 Grouping Context Vocabulary 240
+
+10.7 Hashing Algorithm Vocabulary 241
+
+10.8 Identity Class Vocabulary 242
+
+10.9 Implementation Language Vocabulary 243
+
+10.10 Indicator Type Vocabulary 244
+
+10.11 Industry Sector Vocabulary 245
+
+10.12 Infrastructure Type Vocabulary 246
+
+10.13 Malware Result Vocabulary 247
+
+10.14 Malware Capabilities Vocabulary 248
+
+10.15 Malware Type Vocabulary 251
+
+10.16 Network Socket Address Family Enumeration 253
+
+10.17 Network Socket Type Enumeration 254
+
+10.18 Opinion Enumeration 255
+
+10.19 Pattern Type Vocabulary 255
+
+10.20 Processor Architecture Vocabulary 256
+
+10.21 Region Vocabulary 257
+
+10.22 Report Type Vocabulary 258
+
+10.23 Threat Actor Type Vocabulary 259
+
+10.24 Threat Actor Role Vocabulary 262
+
+10.25 Threat Actor Sophistication Vocabulary 262
+
+10.26 Tool Type Vocabulary 265
+
+10.27 Windows™ Integrity Level Enumeration 266
+
+10.28 Windows™ PE Binary Vocabulary 266
+
+10.29 Windows™ Registry Datatype Enumeration 267
+
+10.30 Windows™ Service Start Type Enumeration 268
+
+10.31 Windows™ Service Type Enumeration 269
+
+10.32 Windows™ Service Status Enumeration 269
+
+11 Customizing STIX (Deprecated) 271
+
+11.1 Custom Properties (Deprecated) 271
+
+11.1.1 Requirements (Deprecated) 271
+
+11.2 Custom Objects (Deprecated) 272
+
+11.2.1 Requirements (Deprecated) 272
+
+11.3 Custom Object Extensions (Deprecated) 273
+
+11.3.1 Requirements (Deprecated) 273
+
+12 Conformance 275
+
+12.1 STIX Object Producers and Consumers 275
+
+12.2 STIX Object Mandatory Features 275
+
+12.2.1 Versioning 275
+
+12.3 STIX Object Optional Features 275
+
+12.3.1 Object-Level Data Markings 275
+
+12.3.2 Granular Data Markings 275
+
+12.3.3 STIX Extensions 276
+
+12.4 STIX Patterning Conformance 276
+
+12.5 STIX Pattern Producer 276
+
+12.6 STIX Pattern Consumer 276
+
+12.7 STIX Patterning Conformance Levels 277
+
+12.7.1 Level 1: Basic Conformance 277
+
+12.7.2 Level 2: Basic Conformance plus Observation Operators 277
+
+12.7.3 Level 3: Full Conformance 277
+
+Appendix A. Confidence Scales 278
+
+Appendix B. Relationship Summary Table 280
+
+Appendix C. Additional Examples 283
+
+C.1 Infrastructure Additional Examples 283
+
+C.1.1 Malware & Target List Hosting Domain 283
+
+C.1.2 Malware Botnet Infrastructure 284
+
+C.1.3 Related/Component Botnet Infrastructure 286
+
+C.1.4 Malware Instance Hosted on Compromised Domain 288
+
+C.2 Extension Definition Additional Examples 289
+
+C.2.1 Create a new object type with a copyright marking definition 289
+
+C.2.2 Adding properties to an existing an STIX object instance 290
+
+C.2.3 Adding properties to an existing an STIX relationship object instance 291
+
+C.2.4 Adding properties to an existing STIX marking definition object instance 292
+
+C.2.5 Adding properties to an existing STIX language content object instance 293
+
+Appendix D. IANA Considerations 294
+
+Appendix E. References 297
+
+E.1 Normative References 297
+
+E.2 Informative References 300
+
+Appendix F. Acknowledgments 303
+
+Appendix G. Revision History 309
