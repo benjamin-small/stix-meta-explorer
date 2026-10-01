@@ -52,6 +52,16 @@ This release prevents the unsupported mobile model load; it does not add mobile 
 
 ## Runtime and isolation
 
+### Dictate a question
+
+Use the **microphone button** beside **Send** to dictate into the chat box. Microphone access is requested only after you click it. The button changes to a stop icon while starting or listening. Click it again to finish dictation, review or edit the transcript, then select **Send**. Nothing is sent to the agent automatically, and replies are not read aloud.
+
+Dictation appends to the existing draft and updates as the browser refines its transcript. Typing, sending a question, selecting **New chat**, changing the inference backend, or closing the sidebar ends microphone use. Late recognition events cannot overwrite an edited or sent draft. Dictation respects the same 16,000-character limit as typed input. Recognition uses the page language (English), and does not restart automatically when the browser ends a session.
+
+Voice input uses the browser's [`SpeechRecognition`](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) API, including `webkitSpeechRecognition` where necessary. It requires HTTPS or localhost, microphone permission, and a browser with a working speech recognition service. Some browsers send audio to their provider for transcription and require a network connection; the composer discloses this before microphone use. This is separate from the local STIX model. The application does not record or store audio, and requires no additional model download or API key. Unsupported browsers show a disabled microphone and keep typed chat available. Permission, microphone, and recognition errors appear next to the composer without discarding the draft.
+
+### Inference
+
 - Patched Flare at the existing POC's pinned revision runs SmolLM2-360M-Instruct in Rust/WASM, with asynchronous WebGPU decoding and CPU prefill. GPU initialization failure falls back to CPU. The performance panel checks finite logits, GPU-resident weights and GPU KV state after decoding; capability detection alone is not labelled verified decoding.
 - STIX retrieval is a separate Rust/WASM crate, `crates/stix-agent-core`. It ranks object names, aliases, exact property names, relationship direction, and explanatory reference cards. Conversational pronouns can use the previous or currently selected object type.
 - Maximum context is 2,048 tokens, with 256 tokens reserved for the response. Conversation history is used only to resolve the subject of follow-up questions; previous generated answers are never replayed into the model. Each generation receives the current question and fresh references. Lower-ranked references are removed if needed. Oversized current questions are rejected. ChatML delimiters in questions and references are escaped.

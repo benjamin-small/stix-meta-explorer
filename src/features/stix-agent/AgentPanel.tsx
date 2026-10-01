@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Evidence, Metrics, Request, Response } from './protocol';
 import type { Message } from './prompt';
 import { startRuntimeSession } from './availability';
+import { MAX_QUESTION_LENGTH, useVoiceInput } from './useVoiceInput';
 import './agent.css';
 
 type Turn = { id: string; question: string; answer: string; evidence: Evidence[]; metrics?: Metrics; complete: boolean };
@@ -19,6 +20,8 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
   const [turns, setTurns] = useState<Turn[]>([]);
   const [warning, setWarning] = useState('');
   const [fatal, setFatal] = useState(false);
+  const voice = useVoiceInput();
+  const cancelVoice = voice.cancel;
   const worker = useRef<Worker | null>(null);
   const releaseWorker = useRef<(() => void) | null>(null);
   const active = useRef('');
@@ -75,14 +78,15 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
         setTurns(t => t.map(turn => turn.id === message.id ? { ...turn, answer: message.text, metrics: message.metrics, complete: message.metrics.stopReason !== 'cancelled' } : turn));
         setPhase('ready'); setStatus('Ready for your next STIX question.'); active.current = '';
       }
-      if (message.type === 'error') { if (message.fatal) { release(); setBackend('Unloaded'); } setPhase(message.fatal ? 'error' : 'ready'); setStatus(message.message); setFatal(message.fatal); active.current = ''; }
+      if (message.type === 'error') { cancelVoice(); if (message.fatal) { release(); setBackend('Unloaded'); } setPhase(message.fatal ? 'error' : 'ready'); setStatus(message.message); setFatal(message.fatal); active.current = ''; }
     };
-    instance.onerror = event => { if (worker.current === instance) { release(); setBackend('Unloaded'); setPhase('error'); setFatal(true); setStatus(`The local runtime stopped: ${event.message || 'worker unavailable'}. Close other tabs or use another computer before retrying. CPU mode still needs substantial memory.`); } };
+    instance.onerror = event => { if (worker.current === instance) { cancelVoice(); release(); setBackend('Unloaded'); setPhase('error'); setFatal(true); setStatus(`The local runtime stopped: ${event.message || 'worker unavailable'}. Close other tabs or use another computer before retrying. CPU mode still needs substantial memory.`); } };
     instance.postMessage({ type: 'init', id: 'init', manifestUrl: new URL(import.meta.env.BASE_URL + 'stix-agent/model/manifest.json', location.origin).href, backend: preference } satisfies Request);
     return release;
-  }, [epoch, preference]);
+  }, [epoch, preference, cancelVoice]);
   function send(text = draft) {
     if (phase !== 'ready' || !text.trim() || !worker.current) return;
+    cancelVoice();
     const id = crypto.randomUUID(); active.current = id;
     const history: Message[] = turns.filter(t => t.complete).slice(-8).flatMap(t => [{ role: 'user' as const, content: t.question }, { role: 'assistant' as const, content: t.answer }]);
     worker.current.postMessage({ type: 'generate', id, text: text.trim(), history, selectedType } satisfies Request);
@@ -90,6 +94,7 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
     setDraft(''); setPhase('generating'); setStatus('Reading STIX references and generating locally…');
   }
   function stop() {
+    cancelVoice();
     // CPU prefill cannot process a cancel message until it yields. Termination also
     // stops a stalled GPU driver call and releases the entire worker-owned model.
     releaseWorker.current?.(); active.current = '';
@@ -103,8 +108,8 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
     </header>
     <div className="agent-controls">
       <span className="agent-badge">{backend}</span>
-      <label>Inference <select aria-label="Inference backend" value={preference} onChange={e => { setPhase('loading'); setStatus('Loading local runtime…'); setPreference(e.target.value as 'auto' | 'cpu'); }} disabled={phase === 'loading' || phase === 'generating'}><option value="auto">Auto / WebGPU</option><option value="cpu">CPU / WASM</option></select></label>
-      <button disabled={phase === 'generating' || phase === 'loading'} onClick={() => { setTurns([]); worker.current?.postMessage({ type: 'reset', id: 'reset' } satisfies Request); questionInput.current?.focus(); }}>New chat</button>
+      <label>Inference <select aria-label="Inference backend" value={preference} onChange={e => { cancelVoice(); setPhase('loading'); setStatus('Loading local runtime…'); setPreference(e.target.value as 'auto' | 'cpu'); }} disabled={phase === 'loading' || phase === 'generating'}><option value="auto">Auto / WebGPU</option><option value="cpu">CPU / WASM</option></select></label>
+      <button disabled={phase === 'generating' || phase === 'loading'} onClick={() => { cancelVoice(); setTurns([]); worker.current?.postMessage({ type: 'reset', id: 'reset' } satisfies Request); questionInput.current?.focus(); }}>New chat</button>
     </div>
     <div className="agent-status" role={fatal ? 'alert' : 'status'}>{status}{phase === 'loading' && <progress aria-label="Model loading progress" max={100} value={percent} />}
       {(phase === 'error' || phase === 'stopped') && <button className="agent-primary" onClick={retry}>{phase === 'stopped' ? 'Resume chat' : 'Retry loading'}</button>}
@@ -119,8 +124,20 @@ export default function AgentPanel({ onClose, selectedType }: { onClose: () => v
     <form className="agent-composer" onSubmit={e => { e.preventDefault(); send(); }}>
       {selectedType && <button className="agent-context" type="button" disabled={phase !== 'ready'} onClick={() => send(`Explain the ${selectedType} object.`)}>Selected object: {selectedType} ↗</button>}
       <label className="sr-only" htmlFor="stix-agent-question">Ask a STIX question</label>
-      <textarea ref={questionInput} id="stix-agent-question" value={draft} onChange={e => setDraft(e.target.value)} maxLength={16000} placeholder="Ask a STIX 2.1 question…" rows={3} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
-      <div className="agent-compose-footer"><small>Local AI · Check cited rules against the specification.</small>{phase === 'generating' || phase === 'loading' ? <button type="button" onClick={stop}>Stop</button> : <button className="agent-primary" type="submit" disabled={phase !== 'ready' || !draft.trim()}>Send ↑</button>}</div>
+      <textarea ref={questionInput} id="stix-agent-question" value={draft} onChange={e => { cancelVoice(); setDraft(e.target.value); }} maxLength={MAX_QUESTION_LENGTH} placeholder="Ask a STIX 2.1 question…" rows={3} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+      {voice.active && <p className="agent-voice-status" role="status">{voice.phase === 'starting' ? 'Starting microphone… allow microphone access if prompted.' : voice.phase === 'stopping' ? 'Finishing dictation…' : 'Listening… speak your question, then stop the microphone to review.'}</p>}
+      {voice.error && <p className="agent-voice-error" role="alert">{voice.error}</p>}
+      <div className="agent-compose-footer"><small>Local AI · Check cited rules against the specification.</small><div className="agent-compose-actions">
+        <button className="agent-mic" type="button" aria-label={voice.active ? 'Stop voice input' : 'Start voice input'} aria-pressed={voice.active} aria-describedby="stix-agent-voice-note"
+          title={voice.supported ? voice.active ? 'Stop voice input' : 'Dictate a question' : 'Voice input is unavailable in this browser'}
+          disabled={voice.phase === 'stopping' || (!voice.active && (!voice.supported || phase !== 'ready' || draft.length >= MAX_QUESTION_LENGTH))}
+          onClick={() => voice.active ? voice.stop() : voice.start(draft, setDraft)}>
+          {voice.active ? <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" /></svg>
+            : <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" /></svg>}
+        </button>
+        {phase === 'generating' || phase === 'loading' ? <button type="button" onClick={stop}>Stop</button> : <button className="agent-primary" type="submit" disabled={phase !== 'ready' || !draft.trim()}>Send ↑</button>}
+      </div></div>
+      <p id="stix-agent-voice-note" className="agent-voice-note">{voice.supported ? 'Voice input may send audio to your browser’s speech service. Review the text before sending.' : 'Voice input is unavailable in this browser. You can still type your question.'}</p>
     </form>
   </aside>;
 }
