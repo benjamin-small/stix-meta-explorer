@@ -16,7 +16,8 @@ STIX (Structured Threat Information Expression) is an open standard for represen
 - **Property reference** — View every property for each object type, including data types, requirement status, and descriptions linked to the official OASIS spec
 - **Relationship graph** — Interactive D3 force-directed visualization showing how objects relate to each other
 - **Relationship table** — Tabular view of all incoming and outgoing relationships
-- **Example JSON** — See representative JSON for each object type
+- **Example JSON** — See representative JSON for each object type, alongside real instances from the fictional Hackers (1995) case
+- **Hackers bundle explorer** — Browse all 75 objects, a connected graph, linked report narrative, incoming/outgoing references, and indicator pattern fixtures. Deep links use `?view=hackers&object=<STIX ID>`. This repository owns the [full dataset](src/data/hackers-1995/README.md); no runtime fetch or upstream sync is required.
 
 ## Tech Stack
 

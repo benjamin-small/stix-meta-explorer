@@ -1,3 +1,4 @@
+import HackersExamples from '../features/hackers/HackersExamples';
 import { useState } from 'react';
 import type { StixObjectType } from '../types/stix';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '../types/stix';
@@ -75,6 +76,8 @@ export default function ObjectDetail({ object }: ObjectDetailProps) {
           <JsonExample data={object.example} />
         </div>
       )}
+
+      <HackersExamples type={object.type} />
 
       {/* Relationship Table */}
       <div>
