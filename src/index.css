@@ -8,3 +8,14 @@
     margin: 0;
   }
 }
+
+.hackers-explorer a, .hackers-narrative a { color: #38bdf8; text-decoration: underline; text-underline-offset: 3px; }
+.hackers-explorer a[aria-current] { outline: 2px solid #38bdf8; }
+.hackers-explorer :focus-visible, details > summary:focus-visible { outline: 2px solid #fbbf24; outline-offset: 3px; }
+.hackers-explorer li { overflow-wrap: anywhere; }
+.hackers-narrative { overflow-wrap: anywhere; line-height: 1.7; }
+.hackers-narrative p, .hackers-narrative ul { margin: 1rem 0; }
+.hackers-narrative ul { padding-left: 1.5rem; list-style: disc; }
+.hackers-narrative h2 { font-size: 1.3rem; font-weight: 700; margin-top: 1.5rem; }
+.hackers-narrative h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; }
+summary { cursor: pointer; }
