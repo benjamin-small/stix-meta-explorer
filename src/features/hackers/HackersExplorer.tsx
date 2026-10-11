@@ -21,7 +21,7 @@ export default function HackersExplorer() {
   const [search, setSearch] = useState('');
   const [type, setType] = useState('all');
   const [browserOpen, setBrowserOpen] = useState(false);
-  const [scope, setScope] = useState<'nearby' | 'all'>('nearby');
+  const [focusRequest, setFocusRequest] = useState(0);
   const moveFocus = useRef(false);
   const readingPosition = useRef(0);
   const readingLink = useRef<HTMLElement | null>(null);
@@ -40,12 +40,12 @@ export default function HackersExplorer() {
   }, []);
   useEffect(() => {
     if (moveFocus.current) {
-      const heading = document.getElementById('instance-title');
+      const heading = document.getElementById(location.panel === 'explore' ? 'case-graph' : 'instance-title');
       heading?.focus({ preventScroll: true });
       if (window.matchMedia('(max-width: 760px)').matches) heading?.scrollIntoView({ block: 'start' });
       moveFocus.current = false;
     }
-  }, [location.requested, location.panel]);
+  }, [location.requested, location.panel, focusRequest]);
 
   useEffect(() => {
     const list = objectList.current;
@@ -79,23 +79,17 @@ export default function HackersExplorer() {
 
   function selectObject(id: string) {
     if (!hackersById.has(id)) return;
-    if (id === selected.id) {
-      const heading = document.getElementById('instance-title');
-      heading?.focus({ preventScroll: true });
-      if (window.matchMedia('(max-width: 760px)').matches) heading?.scrollIntoView({ block: 'start' });
-      return;
-    }
-    window.history.pushState({}, '', objectHref(id));
-    moveFocus.current = true;
-    setLocation(current => ({ ...current, requested: id }));
+    setFocusRequest(request => request + 1);
     setBrowserOpen(false);
+    moveFocus.current = true;
+    if (id === selected.id) return;
+    window.history.pushState({}, '', objectHref(id));
+    setLocation(current => ({ ...current, requested: id }));
   }
 
   return <main className={`hackers-explorer${location.panel === 'walkthrough' ? ' is-walkthrough' : ''}`} onClick={navigateObject}>
     <header className="case-header">
-      <a className="case-back" href={window.location.pathname}>← STIX reference</a>
-      <div className="case-title-row"><div><p className="case-eyebrow">A STIX 2.1 CASE STUDY</p><h1>Hackers <span>(1995)</span></h1></div><span className="case-count">75 objects <span>·</span> One connected story</span></div>
-      <p className="case-intro">Follow the people, the attack, and the evidence behind the Gibson intrusion.</p>
+      <div className="case-title-row"><div className="case-identity"><h1>Hackers <span>(1995)</span></h1><span className="case-subtitle">STIX 2.1 · {hackersObjects.length} objects</span></div><a className="case-back" href={window.location.pathname}>← STIX reference</a></div>
       <nav className="case-nav" aria-label="Case views">
         <button aria-pressed={location.panel === 'explore'} onClick={() => changePanel('explore')}>Explore connections</button>
         <button aria-pressed={location.panel === 'walkthrough'} onClick={() => changePanel('walkthrough')}>Watch the story</button>
@@ -126,7 +120,7 @@ export default function HackersExplorer() {
         </div>
       </aside>
       <div className="case-stage">
-        {location.panel === 'explore' && <BundleGraph selected={selected.id} scope={scope} onScopeChange={setScope} onNodeSelect={selectObject} />}
+        {location.panel === 'explore' && <BundleGraph selected={selected.id} focusRequest={focusRequest} onNodeSelect={selectObject} />}
         {location.panel === 'story' && <article className="case-story case-panel"><p className="case-eyebrow">THE ELLINGSON CASE FILE · PLOT SPOILERS</p><h2>Hack the planet.</h2><p className="case-help">Select a highlighted citation to inspect its object. Select citations to explore without leaving the narrative.</p><Narrative text={String(report.description)} /></article>}
         {location.panel === 'patterns' && <section className="case-patterns case-panel"><p className="case-eyebrow">FROM EVIDENCE TO DETECTION</p><h2>Indicator patterns</h2><p className="case-help">STIX expressions with expected results from the case fixtures. These are examples, not a live pattern evaluator.</p>{patterns.map(p => <article key={p.name}><h3>{p.name}</h3><pre>{p.pattern}</pre><span className={`case-match ${p.expect.matched ? 'positive' : ''}`}>{p.expect.matched ? 'Expected match' : 'Expected no match'}</span>{p.expect.observed_data.length > 0 && <ul>{p.expect.observed_data.map(id => <li key={id}><a href={objectHref(id)}>{labelOf(hackersById.get(id)!)}</a></li>)}</ul>}</article>)}</section>}
       </div>

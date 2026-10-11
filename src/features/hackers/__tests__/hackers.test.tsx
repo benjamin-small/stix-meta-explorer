@@ -97,6 +97,7 @@ test('selecting objects preserves filters and supports Back/Forward without relo
   const browser = screen.getByRole('complementary', { name: 'Object browser' });
   fireEvent.click(within(browser).getByRole('link', { name: /Da Vinci/ }));
   const selectedUrl = window.location.href;
+  expect(screen.getByRole('group', { name: 'Interactive case graph' })).toHaveFocus();
   expect(screen.getByRole('textbox')).toHaveValue('malware');
   expect(screen.getByRole('combobox')).toHaveValue('malware');
   expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Da Vinci' })).toBeInTheDocument();
@@ -120,15 +121,15 @@ test('narrative citations update the inspector while the story stays open', () =
   window.history.replaceState({}, '', '/');
 });
 
-test('search recovery and context objects provide useful next actions', () => {
+test('search recovery and context objects keep the whole graph available', () => {
   window.history.replaceState({}, '', `?view=hackers&object=${report.id}`);
   render(<HackersExplorer />);
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'no-such-person' } });
   expect(screen.getByText('No objects match these filters.')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
   expect(screen.getByRole('textbox')).toHaveValue('');
-  expect(screen.getByText('This object provides context')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Explore the whole case' }));
-  expect(screen.getByRole('button', { name: 'All objects' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByText('Context object · see its references in the inspector')).toBeInTheDocument();
+  expect(screen.getByText('Graph objects (40)')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Nearby' })).not.toBeInTheDocument();
   window.history.replaceState({}, '', '/');
 });

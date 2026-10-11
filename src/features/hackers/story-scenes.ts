@@ -84,8 +84,3 @@ export function readStoryScene() {
   const id = new URLSearchParams(window.location.search).get('scene');
   return Math.max(0, storyScenes.findIndex(scene => scene.id === id));
 }
-
-export function sceneDuration(index: number) {
-  const { title, text, takeaway } = storyScenes[index];
-  return Math.max(18000, `${title} ${text} ${takeaway}`.split(/\s+/).length * 340 + 3000);
-}

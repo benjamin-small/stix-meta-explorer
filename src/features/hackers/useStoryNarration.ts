@@ -4,14 +4,13 @@ import { useNarrationVoice } from './useNarrationVoice';
 interface NarrationOptions {
   text: string;
   sceneVisit: number;
-  enabled: boolean;
   playing: boolean;
   onEnd: () => void;
   onProgress: (fraction: number) => void;
   onError: () => void;
 }
 
-export function useStoryNarration({ text, sceneVisit, enabled, playing, onEnd, onProgress, onError }: NarrationOptions) {
+export function useStoryNarration({ text, sceneVisit, playing, onEnd, onProgress, onError }: NarrationOptions) {
   const supported = typeof window.speechSynthesis?.speak === 'function' && typeof window.SpeechSynthesisUtterance === 'function';
   const { voice, ready } = useNarrationVoice(supported);
   const current = useRef<SpeechSynthesisUtterance | null>(null);
@@ -31,10 +30,10 @@ export function useStoryNarration({ text, sceneVisit, enabled, playing, onEnd, o
     endedWhilePaused.current = false;
   }, []);
 
-  // A new scene, disabling narration, or leaving the view discards old speech.
-  useEffect(() => stop, [text, sceneVisit, enabled, stop]);
+  // A new scene or leaving the view discards old speech.
+  useEffect(() => stop, [text, sceneVisit, stop]);
   useEffect(() => {
-    if (!supported || !enabled) return;
+    if (!supported) return;
     const synth = window.speechSynthesis;
     if (!playing) {
       if (current.current && !paused.current) {
@@ -66,7 +65,7 @@ export function useStoryNarration({ text, sceneVisit, enabled, playing, onEnd, o
         };
         utterance.onend = () => {
           if (current.current !== utterance) return;
-          // A late end event must not advance a story the reader just paused.
+          // A late end event must not complete narration the reader just paused.
           if (paused.current) { endedWhilePaused.current = true; return; }
           current.current = null;
           callbacks.current.onEnd();
@@ -91,7 +90,7 @@ export function useStoryNarration({ text, sceneVisit, enabled, playing, onEnd, o
       stop();
       callbacks.current.onError();
     }
-  }, [supported, enabled, playing, text, sceneVisit, voice, ready, stop]);
+  }, [supported, playing, text, sceneVisit, voice, ready, stop]);
 
   return supported;
 }
