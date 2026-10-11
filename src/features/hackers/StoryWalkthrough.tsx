@@ -104,7 +104,7 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
             setReadAloud(event.target.checked); setPlaying(false); setSpeechError('');
             elapsedRef.current = 0; setElapsed(0);
           }} /><span>Read aloud</span><small aria-hidden="true">Optional</small></label>
-          <p id="story-speech-help" className="case-help">{!speechSupported ? 'Read aloud is unavailable in this browser. Text playback still works.' : readAloud ? 'Reads the scene and graph note. Press Play; each scene waits for the voice to finish.' : 'Enable to hear the story with your browser’s voice.'}</p>
+          <p id="story-speech-help" className="case-help">{!speechSupported ? 'Read aloud is unavailable in this browser. Text playback still works.' : readAloud ? 'Automatically chooses an English narration voice. Press Play; each scene waits for the voice to finish.' : 'Enable to hear the scene and graph note with an automatically selected voice.'}</p>
           {speechError && <p className="story-speech-error" role="alert">{speechError}</p>}
           <p className="case-help">{complete ? 'The case is complete. Replay, revisit a scene, or explore an object.' : playing ? 'Playing · select an object to pause and inspect.' : 'Move at your own pace, or press Play to advance automatically.'}</p>
         </div>

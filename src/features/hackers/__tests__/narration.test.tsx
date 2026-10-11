@@ -2,20 +2,34 @@ import { StrictMode } from 'react';
 import { act, fireEvent, render, screen, cleanup } from '@testing-library/react';
 import StoryWalkthrough from '../StoryWalkthrough';
 import { sceneDuration, storyScenes } from '../story-scenes';
+import { VOICE_LOAD_WAIT_MS } from '../useNarrationVoice';
 
 vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: () => <canvas /> }));
 
 class Utterance {
   text: string;
+  voice: SpeechSynthesisVoice | null = null;
+  lang = '';
   onend: (() => void) | null = null;
-  onerror: (() => void) | null = null;
+  onerror: ((event?: { error: string }) => void) | null = null;
   onboundary: ((event: { charIndex: number }) => void) | null = null;
   constructor(text: string) { this.text = text; }
 }
 let spoken: Utterance[];
-const synth = { speak: vi.fn((utterance: Utterance) => { spoken.push(utterance); }), cancel: vi.fn(), pause: vi.fn(), resume: vi.fn() };
+let voices: SpeechSynthesisVoice[];
+let voiceEvents: EventTarget;
+const basicVoice = { name: 'System English', lang: 'en-US', voiceURI: 'system-english', default: true, localService: true };
+const naturalVoice = { ...basicVoice, name: 'Microsoft Ava Online (Natural)', voiceURI: 'ava', default: false, localService: false };
+const synth = {
+  speak: vi.fn((utterance: Utterance) => { spoken.push(utterance); }), cancel: vi.fn(), pause: vi.fn(), resume: vi.fn(),
+  getVoices: vi.fn(() => voices),
+  addEventListener: vi.fn((type: string, handler: EventListener) => voiceEvents.addEventListener(type, handler)),
+  removeEventListener: vi.fn((type: string, handler: EventListener) => voiceEvents.removeEventListener(type, handler)),
+};
 beforeEach(() => {
   spoken = [];
+  voices = [basicVoice];
+  voiceEvents = new EventTarget();
   vi.useFakeTimers();
   vi.stubGlobal('speechSynthesis', synth);
   vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
@@ -126,4 +140,62 @@ test('speech errors pause with a recoverable text fallback; absent APIs disable 
   render(<StoryWalkthrough onExplore={() => {}} />);
   expect(screen.getByRole('checkbox', { name: 'Read aloud' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Play story' })).toBeEnabled();
+});
+
+test('waits for an asynchronously populated catalog and uses the preferred voice on the first scene', () => {
+  voices = [];
+  const { unmount } = render(<StoryWalkthrough onExplore={() => {}} />);
+  enable(); play();
+  expect(spoken).toHaveLength(0);
+  act(() => { voices = [basicVoice, naturalVoice]; voiceEvents.dispatchEvent(new Event('voiceschanged')); });
+  expect(spoken).toHaveLength(1);
+  expect(spoken[0].voice).toBe(naturalVoice);
+  expect(spoken[0].lang).toBe('en-US');
+  unmount();
+  expect(synth.removeEventListener).toHaveBeenCalledWith('voiceschanged', expect.any(Function));
+  expect(vi.getTimerCount()).toBe(0);
+});
+
+test('a late better voice applies to the next scene without restarting or resuming current speech', () => {
+  render(<StoryWalkthrough onExplore={() => {}} />);
+  enable(); play();
+  expect(spoken[0].voice).toBe(basicVoice);
+  fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+  const resumes = synth.resume.mock.calls.length;
+  act(() => { voices = [naturalVoice, basicVoice]; voiceEvents.dispatchEvent(new Event('voiceschanged')); });
+  expect(spoken).toHaveLength(1);
+  expect(spoken[0].voice).toBe(basicVoice);
+  expect(synth.resume).toHaveBeenCalledTimes(resumes);
+  play();
+  act(() => { spoken[0].onend?.(); });
+  expect(spoken[1].voice).toBe(naturalVoice);
+});
+
+test('an empty voice catalog cannot block Play indefinitely, and pausing cancels pending playback', () => {
+  voices = [];
+  render(<StoryWalkthrough onExplore={() => {}} />);
+  enable(); play();
+  fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+  act(() => { vi.advanceTimersByTime(VOICE_LOAD_WAIT_MS); });
+  expect(spoken).toHaveLength(0);
+  play();
+  expect(spoken).toHaveLength(1);
+  expect(spoken[0].voice).toBeNull();
+  expect(spoken[0].lang).toBe('en-US');
+});
+
+test('an unavailable preferred voice retries the browser fallback once, then reports a recoverable failure', () => {
+  voices = [naturalVoice];
+  render(<StoryWalkthrough onExplore={() => {}} />);
+  enable(); play();
+  expect(spoken[0].voice).toBe(naturalVoice);
+  act(() => { spoken[0].onerror?.({ error: 'network' }); });
+  expect(spoken).toHaveLength(2);
+  expect(spoken[1].voice).toBeNull();
+  expect(spoken[1].lang).toBe('en-US');
+  expect(spoken[1].text).toBe(spoken[0].text);
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  act(() => { spoken[1].onerror?.({ error: 'network' }); });
+  expect(spoken).toHaveLength(2);
+  expect(screen.getByRole('alert')).toHaveTextContent('Read aloud could not play');
 });
