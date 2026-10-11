@@ -1,0 +1,31 @@
+# Hackers story walkthrough
+
+The **Watch the story** view is separate from the complete narrative and the free-form explorer. Nine scenes follow the plot in the owned bundle's report. They use story order rather than the dataset's illustrative evidence timestamps. The prologue uses a portrait of adult Dade as a character illustration, not a claim that the still depicts his childhood arrest.
+
+`src/features/hackers/story-scenes.ts` owns the original scene summaries and the explicit introduction order. Every non-relationship object appears exactly once. Frames accumulate those objects and reveal structural connections only once both endpoints have appeared. The last frame contains all 40 nodes and 51 connections; the bundle's 35 relationship objects are represented by edges. Container references remain in the ordinary explorer.
+
+The graph uses `@poietic-tech/graphing-library` throughout. The first frame loads once; later scenes use `previewNodes`/`commitPreview` to introduce objects into the mounted engine. Rewinding removes later edges and nodes. This preserves the evolving layout instead of reloading it for every scene. The library animates the force layout and reframes when it settles; the browser's reduced-motion preference disables that motion.
+
+Playback is opt-in, with scene durations based on the narrative length. Pause preserves elapsed reading time. Scene jumps, graph interaction, object inspection, Back/Forward, and hiding the document pause playback. Automatic advances replace the scene URL rather than creating one history entry per timer. Leaving the view clears its timer. The revealed-object list is the keyboard and non-WebGL alternative to canvas selection.
+
+## Film imagery
+
+`story-media.ts` maps each scene to one visually reviewed still in the [Cinematic Freeze Hackers gallery](https://www.cinematicfreeze.com/hackers-1995-stills/). The gallery was inspected on October 10, 2026. The film is *Hackers* (1995), directed by Iain Softley, MGM/United Artists; these images are third-party film imagery, not original dataset material or assets covered by the dataset's MIT license. The gallery's own copyright statement does not establish a new license for this repository.
+
+The app references the externally hosted images rather than copying their binaries. Each image has descriptive alternative text, a caption, and a source link. Requests omit the referrer. A failed request keeps its caption and source link in place, and resets the image state on the next scene. No GIFs, remote video players, or audio load. To change a visual, edit its manifest entry and verify the still and caption together in a browser.
+
+| Scene | Gallery still | Visual role |
+| --- | --- | --- |
+| Zero Cool | 01 | Dade's character portrait |
+| Back online | 03 | The on-screen rivalry |
+| The crew | 22 | Dade, Kate, and their friends |
+| The intrusion | 46 | The Gibson's virtual file system |
+| The worm | 10 | The Plague in the data center |
+| The frame-up | 17 | Gill and the teenage suspects |
+| Hack the Planet | 43 | The payphone counterattack |
+| The evidence | 53 | Public video screens |
+| Aftermath | 54 | Dade and Kate at the ending |
+
+## Verification
+
+Run `npm run lint`, `npm run build`, and `npm test`. Story tests cover complete and monotonic data revelation, incremental renderer updates and rewinding, playback/pause/resume/end/replay, timer cleanup, hidden documents, scene history, image failures, and returning to the explorer. The graph binding is mocked in unit tests. Check actual WASM rendering, node interaction, forward/backward transitions, scene imagery, and narrow layouts in the browser as well.

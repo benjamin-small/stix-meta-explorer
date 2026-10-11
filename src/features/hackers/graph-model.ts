@@ -1,7 +1,7 @@
 import { bundleToGraph, hackersObjects, labelOf, objectFamily } from '../../data/hackers';
 import type { BundleObject, BundleEdge } from '../../data/hackers';
 
-function toWireGraph(nodes: BundleObject[], edges: BundleEdge[]) {
+export function toWireGraph(nodes: BundleObject[], edges: BundleEdge[]) {
   return {
     nodes: nodes.map(object => ({
       id: object.id,
@@ -12,7 +12,7 @@ function toWireGraph(nodes: BundleObject[], edges: BundleEdge[]) {
       id: edge.id,
       source: edge.source,
       target: edge.target,
-      attrs: { label: edge.label.replaceAll('_', ' '), source: edge.source, target: edge.target, relationshipId: edge.relationshipId ?? '' },
+      attrs: { edge_id: edge.id, label: edge.label.replaceAll('_', ' '), source: edge.source, target: edge.target, relationshipId: edge.relationshipId ?? '' },
     })),
   };
 }

@@ -18,6 +18,7 @@ STIX (Structured Threat Information Expression) is an open standard for represen
 - **Relationship table** — Tabular view of all incoming and outgoing relationships
 - **Example JSON** — See representative JSON for each object type, alongside real instances from the fictional Hackers (1995) case
 - **Hackers bundle explorer** — Browse all 75 objects with persistent search and type filters. Explore a focused neighborhood or the full graph with zoom/pan controls; inspect named relationships and references; read the linked narrative or indicator pattern fixtures in dedicated views. Object selection updates in place and supports browser Back/Forward. Deep links use `?view=hackers&object=<STIX ID>`. This repository owns the [full dataset](src/data/hackers-1995/README.md); no runtime fetch or upstream sync is required.
+- **Story walkthrough** — “Watch the story” pairs nine plot scenes with sourced film stills and a graph that grows as people, systems, and evidence enter the story. Step forward/back, jump to a scene, or play automatically; inspecting a node or leaving the tab pauses playback. Share a scene with `?view=hackers&panel=walkthrough&scene=the-worm`. Motion follows the browser's reduced-motion preference. Stills load from their external host; captions, source links, and the object list remain usable if an image or WebGL is unavailable. See [story and media notes](docs/hackers-story.md).
 
 ## Tech Stack
 

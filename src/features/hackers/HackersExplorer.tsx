@@ -5,14 +5,15 @@ import patterns from '../../data/hackers-1995/patterns.json';
 import Narrative from './Narrative';
 import BundleGraph from './BundleGraph';
 import InstanceDetail from './InstanceDetail';
+import StoryWalkthrough from './StoryWalkthrough';
 import './hackers.css';
 
-type Panel = 'explore' | 'story' | 'patterns';
+type Panel = 'explore' | 'story' | 'patterns' | 'walkthrough';
 const types = [...new Set(hackersObjects.map(o => o.type))].sort();
 const readLocation = () => {
   const params = new URLSearchParams(window.location.search);
   const panel = params.get('panel');
-  return { requested: params.get('object'), panel: (panel === 'story' || panel === 'patterns' ? panel : 'explore') as Panel };
+  return { requested: params.get('object'), panel: (panel === 'story' || panel === 'patterns' || panel === 'walkthrough' ? panel : 'explore') as Panel };
 };
 
 export default function HackersExplorer() {
@@ -44,7 +45,7 @@ export default function HackersExplorer() {
       if (window.matchMedia('(max-width: 760px)').matches) heading?.scrollIntoView({ block: 'start' });
       moveFocus.current = false;
     }
-  }, [location.requested]);
+  }, [location.requested, location.panel]);
 
   useEffect(() => {
     const list = objectList.current;
@@ -90,19 +91,26 @@ export default function HackersExplorer() {
     setBrowserOpen(false);
   }
 
-  return <main className="hackers-explorer" onClick={navigateObject}>
+  return <main className={`hackers-explorer${location.panel === 'walkthrough' ? ' is-walkthrough' : ''}`} onClick={navigateObject}>
     <header className="case-header">
       <a className="case-back" href={window.location.pathname}>← STIX reference</a>
       <div className="case-title-row"><div><p className="case-eyebrow">A STIX 2.1 CASE STUDY</p><h1>Hackers <span>(1995)</span></h1></div><span className="case-count">75 objects <span>·</span> One connected story</span></div>
       <p className="case-intro">Follow the people, the attack, and the evidence behind the Gibson intrusion.</p>
       <nav className="case-nav" aria-label="Case views">
         <button aria-pressed={location.panel === 'explore'} onClick={() => changePanel('explore')}>Explore connections</button>
+        <button aria-pressed={location.panel === 'walkthrough'} onClick={() => changePanel('walkthrough')}>Watch the story</button>
         <button aria-pressed={location.panel === 'story'} onClick={() => changePanel('story')}>Read the case</button>
         <button aria-pressed={location.panel === 'patterns'} onClick={() => changePanel('patterns')}>Indicator patterns <span>{patterns.length}</span></button>
       </nav>
     </header>
     {location.requested && !hackersById.has(location.requested) && <p role="status" className="case-notice">That object is not in this case. Showing Zero Cool instead.</p>}
-    <div className={`case-workspace panel-${location.panel}`}>
+    {location.panel === 'walkthrough' ? <StoryWalkthrough onExplore={id => {
+      const url = new URL(objectHref(id), window.location.href);
+      url.searchParams.delete('panel');
+      moveFocus.current = true;
+      window.history.pushState({}, '', url);
+      setLocation({ requested: id, panel: 'explore' });
+    }} /> : <div className={`case-workspace panel-${location.panel}`}>
       <aside className="case-browser case-panel" aria-label="Object browser">
         <div className="case-browser-heading"><h2>Case objects</h2><span>{hackersObjects.length}</span></div>
         <label htmlFor="bundle-search" className="sr-only">Search case objects</label>
@@ -129,7 +137,7 @@ export default function HackersExplorer() {
         }}>↑ Back to {location.panel === 'story' ? 'reading' : 'patterns'}</button>}
         <InstanceDetail key={selected.id} object={selected} onReadStory={() => changePanel('story')} />
       </div>
-    </div>
+    </div>}
     <footer className="case-footer">A fictional, fan-made teaching dataset. Not affiliated with the film’s makers or studio. In-story dates are illustrative.</footer>
   </main>;
 }
