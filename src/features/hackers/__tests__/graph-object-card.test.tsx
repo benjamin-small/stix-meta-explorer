@@ -10,11 +10,11 @@ const ids = people.map(object => object.id);
 const hit = vi.fn<GraphClient['nodeAt']>(() => ({ kind: 'node', id: ids[0] }));
 const client = { nodeAt: hit } as unknown as GraphClient;
 
-function Harness({ nodes = ids, onSelect = vi.fn() }: { nodes?: string[]; onSelect?: (id: string) => void }) {
+function Harness({ nodes = ids }: { nodes?: string[] }) {
   const host = useRef<HTMLDivElement>(null);
   const card = useGraphObjectCard(client, host, nodes);
   return <><div ref={host} role="group" aria-label="Graph" tabIndex={0}><canvas width={800} height={600} /></div>
-    <GraphObjectCard {...card} onSelect={onSelect} /></>;
+    <GraphObjectCard {...card} /></>;
 }
 
 beforeEach(() => { vi.useFakeTimers(); hit.mockReturnValue({ kind: 'node', id: ids[0] }); });
@@ -41,21 +41,19 @@ test('hover hit testing respects retina canvas coordinates and shows the actual 
   expect(within(card).getByText('threat-actor')).toBeInTheDocument();
 });
 
-test('the card stays open while hovered, selects without navigation, and Escape dismisses without reopening', () => {
-  const select = vi.fn();
-  render(<Harness onSelect={select} />);
+test('the card stays open while hovered or focused, and closing or Escape dismisses without reopening', () => {
+  render(<Harness />);
   const { graph, canvas } = point();
   advance(170);
   fireEvent.pointerLeave(graph);
   fireEvent.pointerEnter(screen.getByRole('dialog'));
   advance(500);
   expect(screen.getByRole('dialog')).toBeInTheDocument();
-  screen.getByRole('button', { name: 'Select object →' }).focus();
+  screen.getByRole('button', { name: 'Close object preview' }).focus();
   fireEvent.pointerLeave(screen.getByRole('dialog'));
   advance(500);
   expect(screen.getByRole('dialog')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Select object →' }));
-  expect(select).toHaveBeenCalledWith(ids[0]);
+  fireEvent.click(screen.getByRole('button', { name: 'Close object preview' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   fireEvent.pointerLeave(graph); advance(200);
   fireEvent.pointerMove(canvas, { clientX: 120, clientY: 140, buttons: 0 }); advance(170);

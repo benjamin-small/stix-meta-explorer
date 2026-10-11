@@ -85,7 +85,7 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
         <button className="case-button" onClick={() => onScopeChange('all')}>Explore the whole case</button>
       </div>}
     </div>
-    <GraphObjectCard {...card} onSelect={onNodeSelect} />
+    <GraphObjectCard {...card} />
     <div className="case-graph-footer">
       <span className="case-help">Hover for details; arrow keys preview objects. Drag to arrange or pan; scroll to zoom.</span>
       <div className="case-segment" aria-label="Graph zoom">

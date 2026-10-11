@@ -4,7 +4,7 @@ import { hackersById, labelOf } from '../../data/hackers';
 import { useGraphObjectCard } from './useGraphObjectCard';
 import './graph-object-card.css';
 
-export default function GraphObjectCard({ preview, keepOpen, leave, dismiss, onSelect }: ReturnType<typeof useGraphObjectCard> & { onSelect: (id: string) => void }) {
+export default function GraphObjectCard({ preview, keepOpen, leave, dismiss }: ReturnType<typeof useGraphObjectCard>) {
   const card = useRef<HTMLDivElement>(null);
   const titleId = useId();
   useLayoutEffect(() => {
@@ -30,6 +30,5 @@ export default function GraphObjectCard({ preview, keepOpen, leave, dismiss, onS
       {typeof object.first_observed === 'string' && <><dt>First observed · synthetic</dt><dd>{object.first_observed}</dd></>}
       <dt>STIX ID</dt><dd className="graph-object-id">{object.id}</dd>
     </dl>
-    <button className="graph-object-select" onClick={() => { onSelect(object.id); dismiss(); }}>Select object →</button>
   </div>, document.body);
 }

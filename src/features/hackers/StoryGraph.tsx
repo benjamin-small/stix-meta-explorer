@@ -88,7 +88,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
         focusOnClick={false} onReady={setClient} onNodeClick={node => { if (node) onSelect(node.id); }} />
       {error && <p role="alert" className="story-graph-error">{error}</p>}
     </div>
-    <GraphObjectCard {...card} onSelect={onSelect} />
+    <GraphObjectCard {...card} />
     <div className="story-graph-tools">
       <span><i className="story-dot new" /> New this scene <i className="story-dot" /> Already revealed</span>
       <div className="case-segment" aria-label="Story graph zoom">

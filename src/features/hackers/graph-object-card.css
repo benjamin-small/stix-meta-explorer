@@ -9,6 +9,5 @@
 .graph-object-card dt { color: #93aaba; font-size: 10px; margin-top: 8px; }
 .graph-object-card dd { margin-top: 4px; overflow-wrap: anywhere; }
 .graph-object-id { font: 11px/1.7 ui-monospace, monospace; }
-.graph-object-select { margin-top: 18px; padding: 8px 12px; border: 1px solid #647687; border-radius: 6px; color: #f1c385; }
 .graph-object-card button:hover { background: #293e4e; }
 .graph-object-card button:focus-visible, .story-canvas:focus-visible, .case-graph-canvas:focus-visible { outline: 2px solid #f1b86a; outline-offset: 3px; }
