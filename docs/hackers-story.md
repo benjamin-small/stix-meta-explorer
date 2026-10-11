@@ -20,6 +20,14 @@ The catalog is read immediately and updated on `voiceschanged`. An initially emp
 
 The utterance's [end event](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance/end_event) completes narration at 100% without changing the scene or URL. Word-boundary events update narration progress when the voice provides them. Scene changes and leaving the view cancel speech, and late events from canceled utterances are ignored. Browsers without the API disable only the narration button. The scene announcement live region is quiet while narration is playing to avoid a duplicate announcement.
 
+## Connections explorer
+
+The shared header uses a compact title row and view tabs. **Explore connections** keeps the full 40-node, 51-connection graph loaded when selecting objects in the browser, graph, references, or browser history. Selection changes camera position and styling without reloading the graph or restarting its layout. **Fit all** returns to the overview; pan and zoom remain available.
+
+The selected node is gold. Its immediate neighbors and incident edges stay bright; nodes two or more hops away (and disconnected nodes) remain visible at lower opacity with their labels suppressed. Hover cards remain available on distant nodes. Selecting a relationship highlights its edge and both endpoints, and navigates to its source. Context objects with no structural edges remain in the full graph and retain references in the inspector. Selection framing keeps at least 85% of the overview camera distance to avoid zooming into an isolated object, and preserves a wider manual zoom. Camera transitions respect reduced motion.
+
+On narrow screens, the graph appears before the inspector, and choosing an object brings the graph into view. Direct links ending in `#instance` still open the inspector. Search and type filters affect only the object browser, never the graph's node set.
+
 ## Object shapes
 
 Both the explorer and story graph share an explicit STIX type mapping in `graph-shapes.ts`. Version 0.9.0 of the graphing library supports three shapes: circles for people and groups, squares for systems and artifacts, and diamonds for actions and evidence (including case context). Intrusion sets use the activity diamond; the people/group circle is reserved for Threat Actors and Identities. The expandable **Object shapes** key lists every assigned type. Related types share a shape; selection and scene highlights change color/size without changing that shape. Relationship objects remain edges. No custom renderer or dependency replacement is involved.

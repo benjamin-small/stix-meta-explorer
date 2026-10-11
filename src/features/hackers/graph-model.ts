@@ -18,13 +18,17 @@ export function toWireGraph(nodes: BundleObject[], edges: BundleEdge[]) {
 }
 
 const structural = bundleToGraph(hackersObjects);
-const wholeCase = toWireGraph(structural.nodes, structural.edges);
+// Keep one graph identity so selection never reloads the renderer or its layout.
+export const wholeCaseGraph = toWireGraph(structural.nodes, structural.edges);
 
-export function graphForSelection(selected: string, scope: 'nearby' | 'all') {
-  // Stable identity matters: the React binding reloads graph data when it changes.
-  // In the overview, selection updates styling without resetting the camera/layout.
-  if (scope === 'all') return wholeCase;
-  const edges = structural.edges.filter(edge => edge.source === selected || edge.target === selected || edge.relationshipId === selected);
-  const ids = new Set([selected, ...edges.flatMap(edge => [edge.source, edge.target])]);
-  return toWireGraph(structural.nodes.filter(object => ids.has(object.id)), edges);
+export function graphSelection(selected: string) {
+  // Relationships are drawn as edges, so navigate to their endpoints instead.
+  const relationship = structural.edges.find(edge => edge.relationshipId === selected);
+  const focusIds = relationship ? [relationship.source, relationship.target] : [selected];
+  const edges = structural.edges.filter(edge => focusIds.includes(edge.source) || focusIds.includes(edge.target));
+  return {
+    focusIds,
+    nearbyIds: [...new Set([...focusIds, ...edges.flatMap(edge => [edge.source, edge.target])])],
+    edgeIds: edges.map(edge => edge.id),
+  };
 }

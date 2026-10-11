@@ -11,7 +11,7 @@ import { storyMedia } from '../story-media';
 
 const renderer = vi.hoisted(() => ({
   props: null as GraphExplorerProps | null,
-  client: { load: vi.fn(), previewNodes: vi.fn(() => true), commitPreview: vi.fn(), removeNode: vi.fn(), removeEdge: vi.fn(), fitView: vi.fn(), zoom: vi.fn(), graphNodes: vi.fn(() => []), zoomIn: vi.fn(), zoomOut: vi.fn() },
+  client: { load: vi.fn(), previewNodes: vi.fn(() => true), commitPreview: vi.fn(), removeNode: vi.fn(), removeEdge: vi.fn(), fitView: vi.fn(), focus: vi.fn(), cameraPose: vi.fn(() => ({ target: [0, 0, 0], distance: 100, yaw: 0, pitch: 0 })), setCameraPose: vi.fn(), zoom: vi.fn(), graphNodes: vi.fn(() => []), zoomIn: vi.fn(), zoomOut: vi.fn() },
 }));
 vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: (props: GraphExplorerProps) => {
   renderer.props = props;

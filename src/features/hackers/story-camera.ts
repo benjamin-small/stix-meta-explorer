@@ -9,7 +9,7 @@ export function fitStoryGraph(client: GraphClient) {
 // A reveal starts a force-layout transition. Its final bounds are not available
 // at the initial fit, so keep framing the whole scene until positions settle.
 // Manual pan/zoom/drag cancels this session; the next scene starts a fresh one.
-export function followStoryLayout(client: GraphClient) {
+export function followStoryLayout(client: GraphClient, onSettled?: () => void) {
   let frame = 0;
   let started: number | undefined;
   let lastFit = -Infinity;
@@ -28,7 +28,10 @@ export function followStoryLayout(client: GraphClient) {
       fitStoryGraph(client);
       previous = client.graphNodes();
       lastFit = now;
-      if ((now - started >= 750 && now - stableSince >= 300) || now - started >= 10000) return;
+      if ((now - started >= 750 && now - stableSince >= 300) || now - started >= 10000) {
+        onSettled?.();
+        return;
+      }
     }
     frame = requestAnimationFrame(tick);
   };
