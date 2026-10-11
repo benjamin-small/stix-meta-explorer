@@ -181,3 +181,14 @@
   .panel-story .case-inspector-slot, .panel-patterns .case-inspector-slot { order: 3; }
   .case-return-reading { display: block; color: #8bd1ee; font-size: 12px !important; margin-bottom: 12px; padding: 10px 0; }
 }
+.case-shape-key { border-top: 1px solid var(--case-line); padding: 12px 20px; color: var(--case-muted); font-size: 11px; }
+.case-shape-key summary { cursor: pointer; min-height: 24px; line-height: 24px; }
+.case-shape-key summary > span { margin-left: 8px; letter-spacing: 5px; color: #b1c2cd; }
+.case-shape-key ul { display: grid; gap: 14px; margin: 14px 0; }
+.case-shape-key li { display: flex; gap: 12px; align-items: baseline; }
+.case-shape-key strong { color: #d8e2e9; font-weight: 500; }
+.case-shape-key small { font-size: inherit; font-weight: normal; color: var(--case-muted); }
+.case-shape-key p { line-height: 1.7; margin-top: 3px; overflow-wrap: anywhere; }
+.case-shape { display: inline-block; width: 10px; height: 10px; background: #b1c2cd; flex-shrink: 0; }
+.case-shape.circle { border-radius: 50%; }
+.case-shape.diamond { transform: rotate(45deg); }

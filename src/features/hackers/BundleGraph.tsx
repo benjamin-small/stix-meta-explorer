@@ -3,6 +3,8 @@ import { GraphExplorer } from '@poietic-tech/graphing-library/react';
 import type { GraphClient, StyleSpec } from '@poietic-tech/graphing-library';
 import { objectFamily, objectHref } from '../../data/hackers';
 import { graphForSelection } from './graph-model';
+import { typeShapeRules } from './graph-shapes';
+import ShapeLegend from './ShapeLegend';
 
 interface Props {
   selected: string;
@@ -23,6 +25,7 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
   const style = useMemo<StyleSpec>(() => ({
     node_base: { color: '#9babb9', radius: scope === 'all' ? 24 : 9, shape: 'circle', label_visible: true },
     node_rules: [
+      ...typeShapeRules,
       ...families.map(family => ({ when: { attr: 'family', equals: family.label }, set: { color: family.color } })),
       { when: { attr: 'stix_id', equals: selected }, set: { radius: scope === 'all' ? 32 : 13, color: '#ffdc91' } },
     ],
@@ -86,6 +89,7 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
       </div>
     </div>
     <div className="case-legend">{families.map(family => <span key={family.label}><i style={{ background: family.color }} />{family.label}</span>)}</div>
+    <ShapeLegend />
     <details className="case-graph-list">
       <summary>Graph objects ({graph.nodes.length})</summary>
       <p className="case-help">An accessible list of the objects in this view. Also available if your browser cannot display the graph.</p>

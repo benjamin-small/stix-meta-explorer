@@ -4,11 +4,15 @@ import { readStoryScene, sceneDuration, storyFrames, storyScenes } from './story
 import StoryGraph from './StoryGraph';
 import StoryImage from './StoryImage';
 import { storyMedia } from './story-media';
+import { useStoryNarration } from './useStoryNarration';
 import './story.css';
 
 export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string) => void }) {
   const [step, setStep] = useState(readStoryScene);
   const [playing, setPlaying] = useState(false);
+  const [readAloud, setReadAloud] = useState(false);
+  const [speechError, setSpeechError] = useState('');
+  const [sceneVisit, setSceneVisit] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [ready, setReady] = useState(false);
   const [inspected, setInspected] = useState<string | null>(null);
@@ -22,6 +26,8 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
     elapsedRef.current = 0;
     setElapsed(0);
     setInspected(null);
+    setSpeechError('');
+    setSceneVisit(visit => visit + 1);
     setStep(next);
     const url = new URL(window.location.href);
     url.searchParams.set('scene', storyScenes[next].id);
@@ -30,9 +36,26 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
     window.history[automatic ? 'replaceState' : 'pushState']({}, '', url);
   }, []);
 
+  const speechSupported = useStoryNarration({
+    sceneVisit,
+    text: `${scene.title} ${scene.text} Reading the graph. ${scene.takeaway}`,
+    enabled: readAloud,
+    playing,
+    onEnd: () => {
+      if (step < storyScenes.length - 1) chooseScene(step + 1, true);
+      else { elapsedRef.current = sceneDuration(step); setElapsed(sceneDuration(step)); setPlaying(false); }
+    },
+    onProgress: fraction => { elapsedRef.current = fraction * sceneDuration(step); setElapsed(elapsedRef.current); },
+    onError: () => {
+      setPlaying(false); setReadAloud(false);
+      setSpeechError('Read aloud could not play. You can try it again, or press Play to continue without narration.');
+    },
+  });
+
   useEffect(() => {
     const restore = () => {
       setPlaying(false); setStep(readStoryScene()); setInspected(null);
+      setSceneVisit(visit => visit + 1); setSpeechError('');
       setElapsed(0); elapsedRef.current = 0;
     };
     const hide = () => { if (document.hidden) setPlaying(false); };
@@ -42,7 +65,7 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
   }, []);
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || readAloud) return;
     let last = performance.now();
     const timer = window.setInterval(() => {
       const now = performance.now();
@@ -55,7 +78,7 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [playing, step, chooseScene]);
+  }, [playing, step, readAloud, chooseScene]);
 
   function inspect(id: string) { setPlaying(false); setInspected(id); }
   const object = inspected ? hackersById.get(inspected) : undefined;
@@ -77,6 +100,12 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
             <button className="story-play case-button" onClick={() => { if (complete) chooseScene(0); setPlaying(p => !p); }}>{playing ? 'Pause' : complete ? 'Replay story' : 'Play story'}</button>
             <button className="case-button" aria-label="Next scene" disabled={step === storyScenes.length - 1} onClick={() => chooseScene(step + 1)}>→</button>
           </div>
+          <label className="story-read-aloud"><input type="checkbox" checked={readAloud} disabled={!speechSupported} aria-describedby="story-speech-help" onChange={event => {
+            setReadAloud(event.target.checked); setPlaying(false); setSpeechError('');
+            elapsedRef.current = 0; setElapsed(0);
+          }} /><span>Read aloud</span><small aria-hidden="true">Optional</small></label>
+          <p id="story-speech-help" className="case-help">{!speechSupported ? 'Read aloud is unavailable in this browser. Text playback still works.' : readAloud ? 'Reads the scene and graph note. Press Play; each scene waits for the voice to finish.' : 'Enable to hear the story with your browser’s voice.'}</p>
+          {speechError && <p className="story-speech-error" role="alert">{speechError}</p>}
           <p className="case-help">{complete ? 'The case is complete. Replay, revisit a scene, or explore an object.' : playing ? 'Playing · select an object to pause and inspect.' : 'Move at your own pace, or press Play to advance automatically.'}</p>
         </div>
         <div className="story-takeaway"><p className="case-eyebrow">READING THE GRAPH</p><p>{scene.takeaway}</p></div>
@@ -89,6 +118,6 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
     </div>
     <div className="story-discoveries case-panel"><div><p className="case-eyebrow">NEW IN THIS SCENE</p><h3>The story gains {scene.introduced.length === 1 ? 'a new object' : `${scene.introduced.length} objects`}.</h3></div><ul>{scene.introduced.map(id => <li key={id}><button aria-pressed={inspected === id} onClick={() => inspect(id)}>{labelOf(hackersById.get(id)!)}<small>{hackersById.get(id)!.type}</small></button></li>)}</ul></div>
     <details className="story-revealed case-panel"><summary>All objects revealed so far ({frame.graph.nodes.length})</summary><ul>{frame.graph.nodes.map(node => <li key={node.id}><button onClick={() => inspect(node.id)}>{node.label}</button></li>)}</ul><p className="case-help">This list also works when the graph cannot render. Relationships appear as connections; context objects keep their references in the explorer.</p></details>
-    <p className="sr-only" role="status">Scene {step + 1} of {storyScenes.length}: {scene.title}</p>
+    <p className="sr-only" role="status" aria-live={readAloud ? 'off' : 'polite'}>Scene {step + 1} of {storyScenes.length}: {scene.title}</p>
   </section>;
 }

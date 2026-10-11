@@ -3,6 +3,8 @@ import { GraphExplorer } from '@poietic-tech/graphing-library/react';
 import type { AnimationSpec, GraphClient, StyleSpec } from '@poietic-tech/graphing-library';
 import { storyFrames, storyScenes } from './story-scenes';
 import { revealStoryGraph } from './story-graph';
+import { typeShapeRules } from './graph-shapes';
+import ShapeLegend from './ShapeLegend';
 
 const simulation = { link_distance: 150, charge_strength: -750, alpha_decay: 0.045 };
 
@@ -30,6 +32,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady, onIntera
   const style = useMemo<StyleSpec>(() => ({
     node_base: { color: '#91a9b8', radius: 13, opacity: .5, label_visible: true },
     node_rules: [
+      ...typeShapeRules,
       { when: { attr: 'stix_id', one_of: frame.activeIds }, set: { color: '#b1daeb', opacity: 1 } },
       { when: { attr: 'stix_id', one_of: storyScenes[step].introduced }, set: { color: '#f1b86a', radius: 17, opacity: 1 } },
       { when: { attr: 'stix_id', equals: selected ?? '' }, set: { color: '#fff0c7', radius: 20, opacity: 1 } },
@@ -66,7 +69,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady, onIntera
 
   return <>
     <div ref={host} className="story-canvas" role="group" aria-label="Story graph" onPointerDown={onInteract} onWheel={onInteract}>
-      <GraphExplorer styleSpec={style} animationSpec={animation} simulationSpec={simulation} background="#101a24"
+      <GraphExplorer style={{ position: 'absolute', inset: 0 }} styleSpec={style} animationSpec={animation} simulationSpec={simulation} background="#101a24"
         focusOnClick={false} onReady={setClient} onNodeClick={node => { if (node) onSelect(node.id); }} />
       {error && <p role="alert" className="story-graph-error">{error}</p>}
     </div>
@@ -78,5 +81,6 @@ export default function StoryGraph({ step, selected, onSelect, onReady, onIntera
         <button aria-label="Zoom in" disabled={!client} onClick={() => { onInteract(); client?.zoomIn(); }}>+</button>
       </div>
     </div>
+    <ShapeLegend />
   </>;
 }

@@ -4,6 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { hackersObjects, hackersById } from '../../../data/hackers';
 import { graphForSelection } from '../graph-model';
 import BundleGraph from '../BundleGraph';
+import { shapeGroups, typeShapeRules } from '../graph-shapes';
 
 const driver = vi.hoisted(() => ({
   props: null as GraphExplorerProps | null,
@@ -35,6 +36,15 @@ test('library graph preserves STIX references and relationship identity', () => 
   expect(graphForSelection(relationship.id, 'all')).toBe(graphForSelection(hackersObjects[0].id, 'all'));
 });
 
+test('every rendered STIX type has exactly one supported shape', () => {
+  const assigned = shapeGroups.flatMap(group => group.types);
+  expect(new Set(assigned).size).toBe(assigned.length);
+  for (const object of hackersObjects.filter(object => object.type !== 'relationship')) {
+    expect(assigned).toContain(object.type);
+  }
+  expect(shapeGroups.map(group => group.shape)).toEqual(['circle', 'square', 'diamond']);
+});
+
 test('uses library controls and selection callbacks without remounting on selection', () => {
   const onNodeSelect = vi.fn();
   const initial = hackersObjects[0].id;
@@ -54,6 +64,8 @@ test('uses library controls and selection callbacks without remounting on select
   expect(driver.props!.graph).toBe(loadedGraph);
   expect(driver.mounts).toBe(mounts);
   expect(driver.props!.styleSpec?.node_rules?.at(-1)?.when?.equals).toBe(target);
+  expect(driver.props!.styleSpec?.node_rules).toEqual(expect.arrayContaining(typeShapeRules));
+  expect(driver.props!.styleSpec?.node_rules?.at(-1)?.set?.shape).toBeUndefined();
   expect(screen.getByText('Graph objects (40)')).toBeInTheDocument();
   unmount();
 });
