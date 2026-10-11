@@ -1,10 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { createHash } from 'node:crypto';
 import { hackersObjects, hackersById, refsOf, bundleToGraph, report } from '../../../data/hackers';
 import patterns from '../../../data/hackers-1995/patterns.json';
 import Narrative from '../Narrative';
 import HackersExamples from '../HackersExamples';
 import HackersExplorer from '../HackersExplorer';
+
+// GPU mounting is covered in the real browser; these tests exercise host navigation.
+vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: () => <canvas aria-label="Graph renderer" /> }));
 
 test('owned dataset has unique STIX IDs, resolved references, and valid pattern fixtures', () => {
   expect(hackersObjects).toHaveLength(75);
@@ -54,7 +57,78 @@ test('deep links select an instance with incoming and outgoing references', () =
   window.history.replaceState({}, '', `?view=hackers&object=${file.id}`);
   render(<HackersExplorer />);
   expect(screen.getByRole('heading', {name:'garbage'})).toBeInTheDocument();
-  expect(screen.getByRole('heading', {name:'Incoming references'})).toBeInTheDocument();
-  expect(screen.getByText('content_ref →')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', {name:/References/}));
+  expect(screen.getByRole('heading', {name:/Incoming references/})).toBeInTheDocument();
+  expect(screen.getByText('content_ref')).toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
+test.each([
+  ['tool--7e7e808f-37c7-4254-8575-14e7020d6a4b', 'Dial-up modem'],
+  ['relationship--8a87ac06-8183-4fd6-bcf3-46312becc151', 'Zero Cool → uses → Dial-up modem'],
+  ['relationship--f365b3ed-48a5-404b-9a6d-a8625ad179ea', 'Acid Burn → uses → Dial-up modem'],
+])('shared link %s survives the modem infrastructure correction', (oldId, title) => {
+  window.history.replaceState({}, '', `?view=hackers&object=${oldId}`);
+  render(<HackersExplorer />);
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: title })).toBeInTheDocument();
+  expect(screen.queryByText(/That object is not in this case/)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /References/ }));
+  expect(screen.getByRole('heading', { name: /Incoming references/ })).toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
+
+test('relationships explain source, verb, and target instead of an ID fragment', () => {
+  const relation = hackersObjects.find(o => o.type === 'relationship' && o.relationship_type === 'targets')!;
+  window.history.replaceState({}, '', `?view=hackers&object=${relation.id}`);
+  render(<HackersExplorer />);
+  const detail = screen.getByRole('region', { name: 'Selected instance' });
+  expect(within(detail).getByRole('heading', { name: /→ targets →/ })).toBeInTheDocument();
+  expect(within(detail).getByLabelText('Relationship endpoints')).toHaveTextContent('↓ targets');
+  expect(within(detail).queryByText('None')).not.toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
+test('selecting objects preserves filters and supports Back/Forward without reloading', () => {
+  window.history.replaceState({}, '', '?view=hackers');
+  render(<HackersExplorer />);
+  fireEvent.change(screen.getByRole('textbox', { name: 'Search case objects' }), { target: { value: 'malware' } });
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'malware' } });
+  const browser = screen.getByRole('complementary', { name: 'Object browser' });
+  fireEvent.click(within(browser).getByRole('link', { name: /Da Vinci/ }));
+  const selectedUrl = window.location.href;
+  expect(screen.getByRole('textbox')).toHaveValue('malware');
+  expect(screen.getByRole('combobox')).toHaveValue('malware');
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Da Vinci' })).toBeInTheDocument();
+  window.history.replaceState({}, '', '?view=hackers');
+  fireEvent.popState(window);
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Zero Cool' })).toBeInTheDocument();
+  window.history.replaceState({}, '', selectedUrl);
+  fireEvent.popState(window);
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Da Vinci' })).toBeInTheDocument();
+  expect(screen.getByRole('textbox')).toHaveValue('malware');
+  window.history.replaceState({}, '', '/');
+});
+
+test('narrative citations update the inspector while the story stays open', () => {
+  window.history.replaceState({}, '', '?view=hackers&panel=story');
+  render(<HackersExplorer />);
+  fireEvent.click(within(screen.getByRole('article')).getByRole('link', { name: 'Gibson', exact: true }));
+  expect(screen.getByRole('button', { name: 'Read the case' })).toHaveAttribute('aria-pressed', 'true');
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Gibson' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Hack the planet.' })).toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
+test('search recovery and context objects provide useful next actions', () => {
+  window.history.replaceState({}, '', `?view=hackers&object=${report.id}`);
+  render(<HackersExplorer />);
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'no-such-person' } });
+  expect(screen.getByText('No objects match these filters.')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+  expect(screen.getByRole('textbox')).toHaveValue('');
+  expect(screen.getByText('This object provides context')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Explore the whole case' }));
+  expect(screen.getByRole('button', { name: 'All objects' })).toHaveAttribute('aria-pressed', 'true');
   window.history.replaceState({}, '', '/');
 });

@@ -14,14 +14,17 @@ STIX (Structured Threat Information Expression) is an open standard for represen
 - **Filter by category** — Quickly narrow down to Domain Objects, Relationship Objects, Cyber Observables, or Meta Objects
 - **Search** — Find objects by name or description
 - **Property reference** — View every property for each object type, including data types, requirement status, and descriptions linked to the official OASIS spec
-- **Relationship graph** — Interactive D3 force-directed visualization showing how objects relate to each other
+- **Type relationship graph** — Interactive D3 force-directed visualization showing how STIX object types relate to each other
 - **Relationship table** — Tabular view of all incoming and outgoing relationships
 - **Example JSON** — See representative JSON for each object type, alongside real instances from the fictional Hackers (1995) case
-- **Hackers bundle explorer** — Browse all 75 objects, a connected graph, linked report narrative, incoming/outgoing references, and indicator pattern fixtures. Deep links use `?view=hackers&object=<STIX ID>`. This repository owns the [full dataset](src/data/hackers-1995/README.md); no runtime fetch or upstream sync is required.
+- **Hackers bundle explorer** — Browse all 75 objects with persistent search and type filters. Explore a focused neighborhood or the full graph with zoom/pan controls; inspect named relationships and references; read the linked narrative or indicator pattern fixtures in dedicated views. Object selection updates in place and supports browser Back/Forward. Deep links use `?view=hackers&object=<STIX ID>`. This repository owns the [full dataset](src/data/hackers-1995/README.md); no runtime fetch or upstream sync is required.
+- **Story walkthrough** — “Watch the story” pairs nine plot scenes with sourced film stills and a graph that grows as people, systems, and evidence enter the story. Step forward/back, jump to a scene, or play automatically; optional **Read aloud** narrates the displayed story and graph note with the browser's voice and advances when speech finishes. Dragging, panning, zooming, and inspecting graph objects leave playback running. Leaving the tab pauses playback. **Pause after each scene** holds the completed scene for discussion and offers **Play next scene** when the presenter is ready. Both graph views use circles, squares, and diamonds for related STIX types, with an expandable shape key. Share a scene with `?view=hackers&panel=walkthrough&scene=the-worm`. Motion follows the browser's reduced-motion preference. Stills load from their external host; captions, source links, and the object list remain usable if an image or WebGL is unavailable. See [story and media notes](docs/hackers-story.md).
 
 ## Tech Stack
 
-React, TypeScript, Vite, Tailwind CSS, D3
+React, TypeScript, Vite, Tailwind CSS, D3 (type reference), and [`@poietic-tech/graphing-library`](https://www.npmjs.com/package/@poietic-tech/graphing-library) (Hackers bundle graph).
+
+The bundle graph uses the graphing library's React binding and Rust/WASM renderer. It supports node dragging, pan, zoom, and selection synchronized with the object inspector. Graph rendering requires WebGL2; an expandable **Graph objects** list provides keyboard navigation and remains available when rendering is unsupported. Vite serves the library directly during development so its WASM asset resolves correctly, and bundles that asset for production.
 
 ## Optional browser STIX assistant
 

@@ -74,7 +74,7 @@
     }
   },
   {
-    "name": "Trace then download (observation AND)",
+    "name": "Trace and download (observation AND, either order)",
     "pattern": "[domain-name:value = 'ellingson-mineral.example'] AND [url:value = 'http://ellingson-mineral.example/gibson/garbage']",
     "expect": {
       "matched": true,
