@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { useEffect } from 'react';
 import type { GraphClient } from '@poietic-tech/graphing-library';
+import type { GraphExplorerProps } from '@poietic-tech/graphing-library/react';
 import { bundleToGraph, hackersById, hackersObjects } from '../../../data/hackers';
 import { storyFrames, storyScenes, sceneDuration } from '../story-scenes';
 import { revealStoryGraph } from '../story-graph';
@@ -7,7 +9,20 @@ import StoryWalkthrough from '../StoryWalkthrough';
 import HackersExplorer from '../HackersExplorer';
 import { storyMedia } from '../story-media';
 
-vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: () => <canvas aria-label="Graph renderer" /> }));
+const renderer = vi.hoisted(() => ({
+  props: null as GraphExplorerProps | null,
+  client: { load: vi.fn(), previewNodes: vi.fn(() => true), commitPreview: vi.fn(), removeNode: vi.fn(), removeEdge: vi.fn(), fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn() },
+}));
+vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: (props: GraphExplorerProps) => {
+  renderer.props = props;
+  useEffect(() => {
+    props.onReady?.(renderer.client as unknown as GraphClient);
+    return () => props.onReady?.(null);
+    // The library creates the client once per mount, not for every config update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <canvas aria-label="Graph renderer" />;
+} }));
 
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); window.history.replaceState({}, '', '/'); });
 
@@ -82,16 +97,30 @@ test('playback starts on request, pauses and resumes, and stops on the last scen
   expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
 });
 
-test('background tabs and inspection pause playback, and unmount cleans up its timer', () => {
+test('graph interactions and object inspection keep playing; hidden tabs still pause and unmount clears the timer', () => {
   vi.useFakeTimers();
   const onExplore = vi.fn();
   const { unmount } = render(<StoryWalkthrough onExplore={onExplore} />);
   fireEvent.click(screen.getByRole('button', { name: 'Play story' }));
+  const graph = screen.getByRole('group', { name: 'Story graph' });
+  fireEvent.pointerDown(graph);
+  fireEvent.pointerMove(graph);
+  fireEvent.pointerUp(graph);
+  fireEvent.wheel(graph, { deltaY: 100 });
+  for (const name of ['Zoom in', 'Zoom out', 'Fit']) {
+    const control = screen.getByRole('button', { name, exact: true });
+    expect(control).toBeEnabled();
+    fireEvent.click(control);
+  }
+  const id = storyScenes[0].introduced[0];
+  act(() => { renderer.props!.onNodeClick!({ id, label: 'Zero Cool', attrs: {}, provisional: false }, { kind: 'node', id }); });
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Zero Cool threat-actor' }));
-  expect(screen.getByRole('button', { name: 'Play story' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Explore object ↗' }));
   expect(onExplore).toHaveBeenCalledWith(storyScenes[0].introduced[0]);
-  fireEvent.click(screen.getByRole('button', { name: 'Play story' }));
+  act(() => { vi.advanceTimersByTime(sceneDuration(0) + 100); });
+  expect(screen.getByRole('heading', { name: storyScenes[1].title })).toBeInTheDocument();
   vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
   fireEvent(document, new Event('visibilitychange'));
   expect(screen.getByRole('button', { name: 'Play story' })).toBeInTheDocument();

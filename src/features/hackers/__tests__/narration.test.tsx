@@ -95,15 +95,20 @@ test('scene changes, including the current chapter, cancel old speech and ignore
   expect(screen.getByRole('button', { name: 'Play story' })).toBeInTheDocument();
 });
 
-test('inspection and hiding the tab pause speech; toggling off and unmount stop it', () => {
+test('graph interaction and inspection leave speech running; hiding the tab pauses and unmount stops it', () => {
   const { unmount } = render(<StoryWalkthrough onExplore={() => {}} />);
   enable(); play();
   fireEvent.click(screen.getByRole('button', { name: 'Zero Cool threat-actor' }));
-  expect(synth.pause).toHaveBeenCalledOnce();
-  play();
+  const graph = screen.getByRole('group', { name: 'Story graph' });
+  fireEvent.pointerDown(graph);
+  fireEvent.wheel(graph, { deltaY: 100 });
+  expect(synth.pause).not.toHaveBeenCalled();
+  expect(synth.cancel).not.toHaveBeenCalled();
+  expect(spoken).toHaveLength(1);
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
   vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
   fireEvent(document, new Event('visibilitychange'));
-  expect(synth.pause).toHaveBeenCalledTimes(2);
+  expect(synth.pause).toHaveBeenCalledOnce();
   enable();
   expect(synth.cancel).toHaveBeenCalledOnce();
   play();

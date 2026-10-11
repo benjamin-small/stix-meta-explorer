@@ -8,9 +8,9 @@ import ShapeLegend from './ShapeLegend';
 
 const simulation = { link_distance: 150, charge_strength: -750, alpha_decay: 0.045 };
 
-export default function StoryGraph({ step, selected, onSelect, onReady, onInteract }: {
+export default function StoryGraph({ step, selected, onSelect, onReady }: {
   step: number; selected: string | null; onSelect: (id: string) => void;
-  onReady: (ready: boolean) => void; onInteract: () => void;
+  onReady: (ready: boolean) => void;
 }) {
   const [client, setClient] = useState<GraphClient | null>(null);
   const [error, setError] = useState('');
@@ -68,7 +68,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady, onIntera
   }, [client]);
 
   return <>
-    <div ref={host} className="story-canvas" role="group" aria-label="Story graph" onPointerDown={onInteract} onWheel={onInteract}>
+    <div ref={host} className="story-canvas" role="group" aria-label="Story graph">
       <GraphExplorer style={{ position: 'absolute', inset: 0 }} styleSpec={style} animationSpec={animation} simulationSpec={simulation} background="#101a24"
         focusOnClick={false} onReady={setClient} onNodeClick={node => { if (node) onSelect(node.id); }} />
       {error && <p role="alert" className="story-graph-error">{error}</p>}
@@ -76,9 +76,9 @@ export default function StoryGraph({ step, selected, onSelect, onReady, onIntera
     <div className="story-graph-tools">
       <span><i className="story-dot new" /> New this scene <i className="story-dot" /> Already revealed</span>
       <div className="case-segment" aria-label="Story graph zoom">
-        <button aria-label="Zoom out" disabled={!client} onClick={() => { onInteract(); client?.zoomOut(); }}>−</button>
-        <button disabled={!client} onClick={() => { onInteract(); client?.fitView(); }}>Fit</button>
-        <button aria-label="Zoom in" disabled={!client} onClick={() => { onInteract(); client?.zoomIn(); }}>+</button>
+        <button aria-label="Zoom out" disabled={!client} onClick={() => client?.zoomOut()}>−</button>
+        <button disabled={!client} onClick={() => client?.fitView()}>Fit</button>
+        <button aria-label="Zoom in" disabled={!client} onClick={() => client?.zoomIn()}>+</button>
       </div>
     </div>
     <ShapeLegend />

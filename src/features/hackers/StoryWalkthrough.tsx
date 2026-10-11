@@ -80,7 +80,7 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
     return () => window.clearInterval(timer);
   }, [playing, step, readAloud, chooseScene]);
 
-  function inspect(id: string) { setPlaying(false); setInspected(id); }
+  function inspect(id: string) { setInspected(id); }
   const object = inspected ? hackersById.get(inspected) : undefined;
 
   return <section className="story-walkthrough" aria-label="Story walkthrough">
@@ -106,13 +106,13 @@ export default function StoryWalkthrough({ onExplore }: { onExplore: (id: string
           }} /><span>Read aloud</span><small aria-hidden="true">Optional</small></label>
           <p id="story-speech-help" className="case-help">{!speechSupported ? 'Read aloud is unavailable in this browser. Text playback still works.' : readAloud ? 'Automatically chooses an English narration voice. Press Play; each scene waits for the voice to finish.' : 'Enable to hear the scene and graph note with an automatically selected voice.'}</p>
           {speechError && <p className="story-speech-error" role="alert">{speechError}</p>}
-          <p className="case-help">{complete ? 'The case is complete. Replay, revisit a scene, or explore an object.' : playing ? 'Playing · select an object to pause and inspect.' : 'Move at your own pace, or press Play to advance automatically.'}</p>
+          <p className="case-help">{complete ? 'The case is complete. Replay, revisit a scene, or explore an object.' : playing ? 'Playing · explore the graph while the story continues.' : 'Move at your own pace, or press Play to advance automatically.'}</p>
         </div>
         <div className="story-takeaway"><p className="case-eyebrow">READING THE GRAPH</p><p>{scene.takeaway}</p></div>
       </article>
       <div className="story-visual case-panel">
         <div className="story-graph-heading"><div><p className="case-eyebrow">THE CASE SO FAR</p><p><strong>{frame.graph.nodes.length}</strong> {frame.graph.nodes.length === 1 ? 'object' : 'objects'} <span>·</span> <strong>{frame.graph.edges.length}</strong> connections</p></div><span className="story-new-count">+{scene.introduced.length} {scene.introduced.length === 1 ? 'object' : 'objects'}</span></div>
-        <StoryGraph step={step} selected={inspected} onSelect={inspect} onReady={setReady} onInteract={() => setPlaying(false)} />
+        <StoryGraph step={step} selected={inspected} onSelect={inspect} onReady={setReady} />
         <div className="story-selection" aria-live="polite">{object ? <><span><small>{object.type}</small><strong>{labelOf(object)}</strong></span><button className="case-button" onClick={() => onExplore(object.id)}>Explore object ↗</button></> : <p className="case-help">{ready ? 'Select any revealed node to inspect it. Drag to arrange; scroll to zoom.' : 'The story and object list are available while the graph loads.'}</p>}</div>
       </div>
     </div>
