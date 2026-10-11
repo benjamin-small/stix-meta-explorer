@@ -69,13 +69,15 @@ export default function HackersExplorer() {
     const id = url.searchParams.get('object');
     if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || url.searchParams.get('view') !== 'hackers' || !id || !hackersById.has(id)) return;
     event.preventDefault();
-    if (id === selected.id) {
-      document.getElementById('instance-title')?.focus({ preventScroll: true });
-      return;
-    }
     if (anchor.closest('.case-stage')) {
       readingPosition.current = window.scrollY;
       readingLink.current = anchor as HTMLElement;
+    }
+    if (id === selected.id) {
+      const heading = document.getElementById('instance-title');
+      heading?.focus({ preventScroll: true });
+      if (window.matchMedia('(max-width: 760px)').matches) heading?.scrollIntoView({ block: 'start' });
+      return;
     }
     window.history.pushState({}, '', url);
     moveFocus.current = true;
@@ -111,7 +113,7 @@ export default function HackersExplorer() {
         </div>
       </aside>
       <div className="case-stage">
-        {location.panel === 'explore' && <BundleGraph key={`${selected.id}-${scope}`} selected={selected.id} scope={scope} onScopeChange={setScope} />}
+        {location.panel === 'explore' && <BundleGraph key={scope === 'all' ? 'all' : selected.id} selected={selected.id} scope={scope} onScopeChange={setScope} />}
         {location.panel === 'story' && <article className="case-story case-panel"><p className="case-eyebrow">THE ELLINGSON CASE FILE · PLOT SPOILERS</p><h2>Hack the planet.</h2><p className="case-help">Select a highlighted citation to inspect its object. Select citations to explore without leaving the narrative.</p><Narrative text={String(report.description)} /></article>}
         {location.panel === 'patterns' && <section className="case-patterns case-panel"><p className="case-eyebrow">FROM EVIDENCE TO DETECTION</p><h2>Indicator patterns</h2><p className="case-help">STIX expressions with expected results from the case fixtures. These are examples, not a live pattern evaluator.</p>{patterns.map(p => <article key={p.name}><h3>{p.name}</h3><pre>{p.pattern}</pre><span className={`case-match ${p.expect.matched ? 'positive' : ''}`}>{p.expect.matched ? 'Expected match' : 'Expected no match'}</span>{p.expect.observed_data.length > 0 && <ul>{p.expect.observed_data.map(id => <li key={id}><a href={objectHref(id)}>{labelOf(hackersById.get(id)!)}</a></li>)}</ul>}</article>)}</section>}
       </div>
