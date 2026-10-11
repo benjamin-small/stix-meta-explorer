@@ -95,8 +95,8 @@
   .story-discoveries button { overflow-wrap: anywhere; }
 }
 @media (prefers-reduced-motion: reduce) { .story-prose { animation: none; } }
-.story-read-aloud { display: flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 10px; color: #e2e9ef; font-size: 13px; cursor: pointer; }
-.story-read-aloud input { accent-color: #e5b768; width: 17px; height: 17px; flex-shrink: 0; }
-.story-read-aloud small { color: var(--case-muted); font-size: 10px; margin-left: auto; }
-.story-read-aloud:has(input:disabled) { opacity: .6; cursor: default; }
+.story-option { display: flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 10px; color: #e2e9ef; font-size: 13px; cursor: pointer; }
+.story-option input { accent-color: #e5b768; width: 17px; height: 17px; flex-shrink: 0; }
+.story-option small { color: var(--case-muted); font-size: 10px; margin-left: auto; }
+.story-option:has(input:disabled) { opacity: .6; cursor: default; }
 .story-speech-error { color: #f4c98e; font-size: 12px; line-height: 1.7; margin: 10px 0; }

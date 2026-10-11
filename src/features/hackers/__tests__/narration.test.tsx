@@ -131,6 +131,34 @@ test('the last spoken scene completes and Replay starts fresh', () => {
   expect(spoken[1].text).toContain(storyScenes[0].text);
 });
 
+test('pause after each scene waits for all speech, holds for discussion, and plays the next scene once', () => {
+  render(<StoryWalkthrough onExplore={() => {}} />);
+  enable(); play();
+  const setting = screen.getByRole('checkbox', { name: 'Pause after each scene' });
+  fireEvent.click(setting);
+  expect(spoken).toHaveLength(1);
+  expect(synth.pause).not.toHaveBeenCalled();
+  act(() => { spoken[0].onend?.(); });
+  expect(screen.getByRole('heading', { name: storyScenes[0].title })).toBeInTheDocument();
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
+  act(() => { vi.advanceTimersByTime(60000); });
+  expect(spoken).toHaveLength(1);
+  fireEvent.click(setting);
+  expect(screen.getByRole('button', { name: 'Play next scene' })).toBeInTheDocument();
+  expect(spoken).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Play next scene' }));
+  expect(spoken).toHaveLength(2);
+  expect(spoken[1].text).toContain(storyScenes[1].text);
+  act(() => { spoken[1].onend?.(); });
+  expect(screen.getByRole('heading', { name: storyScenes[2].title })).toBeInTheDocument();
+  fireEvent.click(setting);
+  fireEvent.click(screen.getByRole('button', { name: 'Scene 9: Aftermath' }));
+  play();
+  act(() => { spoken.at(-1)?.onend?.(); });
+  expect(screen.getByRole('button', { name: 'Replay story' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Play next scene' })).not.toBeInTheDocument();
+});
+
 test('speech errors pause with a recoverable text fallback; absent APIs disable only narration', () => {
   const view = render(<StoryWalkthrough onExplore={() => {}} />);
   enable(); play();

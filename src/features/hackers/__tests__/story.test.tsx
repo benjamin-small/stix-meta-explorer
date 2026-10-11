@@ -97,6 +97,34 @@ test('playback starts on request, pauses and resumes, and stops on the last scen
   expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
 });
 
+test('presentation setting holds the finished scene and continues on request without changing normal playback', () => {
+  vi.useFakeTimers();
+  render(<StoryWalkthrough onExplore={() => {}} />);
+  const setting = screen.getByRole('checkbox', { name: 'Pause after each scene' });
+  expect(setting).not.toBeChecked();
+  fireEvent.click(screen.getByRole('button', { name: 'Play story' }));
+  act(() => { vi.advanceTimersByTime(5000); });
+  const progress = screen.getByRole('progressbar').getAttribute('aria-valuenow');
+  fireEvent.click(setting);
+  expect(screen.getByRole('button', { name: 'Pause', exact: true })).toBeInTheDocument();
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', progress);
+  act(() => { vi.advanceTimersByTime(sceneDuration(0)); });
+  expect(screen.getByRole('heading', { name: storyScenes[0].title })).toBeInTheDocument();
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
+  expect(screen.getByRole('button', { name: 'Play next scene' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Zero Cool threat-actor' }));
+  act(() => { vi.advanceTimersByTime(60000); });
+  expect(screen.getByRole('heading', { name: storyScenes[0].title })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Play next scene' }));
+  expect(screen.getByRole('heading', { name: storyScenes[1].title })).toBeInTheDocument();
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0');
+  expect(setting).toBeChecked();
+  fireEvent.click(setting);
+  act(() => { vi.advanceTimersByTime(sceneDuration(1) + 100); });
+  expect(screen.getByRole('heading', { name: storyScenes[2].title })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Pause', exact: true })).toBeInTheDocument();
+});
+
 test('graph interactions and object inspection keep playing; hidden tabs still pause and unmount clears the timer', () => {
   vi.useFakeTimers();
   const onExplore = vi.fn();
