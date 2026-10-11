@@ -34,13 +34,13 @@
 .story-controls > .case-help { margin-top: 12px; min-height: 40px; font-size: 11px; }
 .story-takeaway { border-top: 1px solid #34424b; padding-top: 20px; margin-top: 12px; }
 .story-takeaway > p:last-child { font-size: 12px; color: #a6bac7; line-height: 1.7; margin-top: 9px; }
-.story-visual { background: #101a24; display: flex; flex-direction: column; }
+.story-visual { background: #101a24; display: flex; flex-direction: column; align-self: start; position: sticky; top: 16px; }
 .story-graph-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 8px; }
 .story-graph-heading > div > p:last-child { font-size: 12px; color: var(--case-muted); margin-top: 8px; }
 .story-graph-heading strong { color: #e2e9ef; font-weight: 500; }
 .story-graph-heading p > span { padding: 0 8px; }
 .story-new-count { color: #f4c98e; background: #302c25; border: 1px solid #5b4a32; padding: 5px 8px; font-size: 10px; border-radius: 5px; white-space: nowrap; }
-.story-canvas { position: relative; height: clamp(360px, 48vh, 580px); flex: 1; min-height: 360px; }
+.story-canvas { position: relative; height: clamp(300px, 45vh, 540px); flex: none; min-height: 0; }
 .story-canvas canvas { touch-action: none; }
 .story-graph-error { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; color: #f4c98e; font-size: 13px; background: #101a24; }
 .story-graph-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--case-line); }
@@ -85,7 +85,8 @@
   .story-prose > p { margin-top: 16px; font-size: 14px; line-height: 1.75; }
   .story-prose h3 { font-size: 29px; }
   .story-takeaway { padding-top: 14px; }
-  .story-canvas { height: 340px; min-height: 340px; flex: auto; }
+  .story-visual { position: static; }
+  .story-canvas { height: 340px; }
   .story-graph-heading { padding: 18px 16px 8px; }
   .story-graph-tools { padding: 12px; gap: 8px; }
   .story-graph-tools > span { max-width: 140px; }

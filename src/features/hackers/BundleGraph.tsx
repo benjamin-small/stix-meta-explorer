@@ -5,6 +5,8 @@ import { objectFamily, objectHref } from '../../data/hackers';
 import { graphForSelection } from './graph-model';
 import { typeShapeRules } from './graph-shapes';
 import ShapeLegend from './ShapeLegend';
+import GraphObjectCard from './GraphObjectCard';
+import { useGraphObjectCard } from './useGraphObjectCard';
 
 interface Props {
   selected: string;
@@ -21,6 +23,8 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
   const [client, setClient] = useState<GraphClient | null>(null);
   const canvasHost = useRef<HTMLDivElement>(null);
   const graph = useMemo(() => graphForSelection(selected, scope), [selected, scope]);
+  const nodeIds = useMemo(() => graph.nodes.map(node => node.id), [graph]);
+  const card = useGraphObjectCard(client, canvasHost, nodeIds);
   const contextOnly = !graph.edges.length && scope === 'nearby';
   const style = useMemo<StyleSpec>(() => ({
     node_base: { color: '#9babb9', radius: scope === 'all' ? 24 : 9, shape: 'circle', label_visible: true },
@@ -62,7 +66,8 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
       </div>
     </div>
     <p className="case-help">{graph.nodes.length} nodes · {graph.edges.length} {graph.edges.length === 1 ? 'connection' : 'connections'}. Select a node to inspect it.</p>
-    <div ref={canvasHost} className="case-graph-canvas" role="group" aria-label="Interactive case graph">
+    <div ref={canvasHost} className="case-graph-canvas" role="group" aria-label="Interactive case graph" tabIndex={0}
+      aria-description="Hover over a node for details, or use arrow keys to preview objects. Escape closes the card.">
       <GraphExplorer
         graph={graph}
         styleSpec={style}
@@ -80,8 +85,9 @@ export default function BundleGraph({ selected, scope, onScopeChange, onNodeSele
         <button className="case-button" onClick={() => onScopeChange('all')}>Explore the whole case</button>
       </div>}
     </div>
+    <GraphObjectCard {...card} onSelect={onNodeSelect} />
     <div className="case-graph-footer">
-      <span className="case-help">Drag nodes to arrange. Drag the background to pan. Scroll to zoom.</span>
+      <span className="case-help">Hover for details; arrow keys preview objects. Drag to arrange or pan; scroll to zoom.</span>
       <div className="case-segment" aria-label="Graph zoom">
         <button aria-label="Zoom out" disabled={!client || contextOnly} onClick={() => client?.zoomOut()}>−</button>
         <button disabled={!client || contextOnly} onClick={() => client?.fitView()}>Fit</button>

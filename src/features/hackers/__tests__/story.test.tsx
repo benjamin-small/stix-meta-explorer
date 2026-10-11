@@ -11,7 +11,7 @@ import { storyMedia } from '../story-media';
 
 const renderer = vi.hoisted(() => ({
   props: null as GraphExplorerProps | null,
-  client: { load: vi.fn(), previewNodes: vi.fn(() => true), commitPreview: vi.fn(), removeNode: vi.fn(), removeEdge: vi.fn(), fitView: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn() },
+  client: { load: vi.fn(), previewNodes: vi.fn(() => true), commitPreview: vi.fn(), removeNode: vi.fn(), removeEdge: vi.fn(), fitView: vi.fn(), zoom: vi.fn(), graphNodes: vi.fn(() => []), zoomIn: vi.fn(), zoomOut: vi.fn() },
 }));
 vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: (props: GraphExplorerProps) => {
   renderer.props = props;
@@ -131,6 +131,10 @@ test('graph interactions and object inspection keep playing; hidden tabs still p
   const { unmount } = render(<StoryWalkthrough onExplore={onExplore} />);
   fireEvent.click(screen.getByRole('button', { name: 'Play story' }));
   const graph = screen.getByRole('group', { name: 'Story graph' });
+  fireEvent.keyDown(graph, { key: 'ArrowRight' });
+  act(() => { vi.advanceTimersByTime(1); });
+  expect(screen.getByRole('dialog', { name: 'Zero Cool' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
   fireEvent.pointerDown(graph);
   fireEvent.pointerMove(graph);
   fireEvent.pointerUp(graph);
@@ -149,6 +153,7 @@ test('graph interactions and object inspection keep playing; hidden tabs still p
   expect(onExplore).toHaveBeenCalledWith(storyScenes[0].introduced[0]);
   act(() => { vi.advanceTimersByTime(sceneDuration(0) + 100); });
   expect(screen.getByRole('heading', { name: storyScenes[1].title })).toBeInTheDocument();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
   fireEvent(document, new Event('visibilitychange'));
   expect(screen.getByRole('button', { name: 'Play story' })).toBeInTheDocument();

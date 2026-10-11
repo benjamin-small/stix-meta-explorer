@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GraphExplorer } from '@poietic-tech/graphing-library/react';
 import type { AnimationSpec, GraphClient, StyleSpec } from '@poietic-tech/graphing-library';
 import { storyFrames, storyScenes } from './story-scenes';
 import { revealStoryGraph } from './story-graph';
 import { typeShapeRules } from './graph-shapes';
 import ShapeLegend from './ShapeLegend';
+import { fitStoryGraph, followStoryLayout } from './story-camera';
+import GraphObjectCard from './GraphObjectCard';
+import { useGraphObjectCard } from './useGraphObjectCard';
 
 const simulation = { link_distance: 150, charge_strength: -750, alpha_decay: 0.045 };
 
@@ -18,6 +21,14 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
   const host = useRef<HTMLDivElement>(null);
   const loaded = useRef<{ client: GraphClient; graph: (typeof storyFrames)[number]['graph'] } | null>(null);
   const frame = storyFrames[step];
+  const nodeIds = useMemo(() => frame.graph.nodes.map(node => node.id), [frame]);
+  const card = useGraphObjectCard(client, host, nodeIds);
+  const cancelFit = useRef<(() => void) | null>(null);
+  const stopFollowing = () => { cancelFit.current?.(); cancelFit.current = null; };
+  const followLayout = useCallback(() => {
+    cancelFit.current?.();
+    if (client) cancelFit.current = followStoryLayout(client);
+  }, [client]);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -27,7 +38,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
   }, []);
   const animation = useMemo<AnimationSpec>(() => ({
     reduced_motion: reducedMotion, halo: { enabled: false },
-    transition: { duration_ms: 700, easing: 'ease-in-out', layout_tween: true, camera_follow: true, fit_on_settle: true },
+    transition: { duration_ms: 700, easing: 'ease-in-out', layout_tween: true, camera_follow: false, fit_on_settle: true },
   }), [reducedMotion]);
   const style = useMemo<StyleSpec>(() => ({
     node_base: { color: '#91a9b8', radius: 13, opacity: .5, label_visible: true },
@@ -47,6 +58,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
     try {
       revealStoryGraph(client, loaded.current?.client === client ? loaded.current.graph : null, frame.graph);
       loaded.current = { client, graph: frame.graph };
+      followLayout();
       onReady(true);
     } catch {
       onReady(false);
@@ -54,31 +66,35 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('The graph could not update. You can still follow the story and its object list.');
     }
-  }, [client, frame, onReady]);
+    return stopFollowing;
+  }, [client, frame, onReady, followLayout]);
 
   useEffect(() => {
     if (!client || !host.current) return;
     let raf = 0;
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => client.fitView());
+      raf = requestAnimationFrame(followLayout);
     });
     observer.observe(host.current);
     return () => { observer.disconnect(); cancelAnimationFrame(raf); };
-  }, [client]);
+  }, [client, followLayout]);
 
   return <>
-    <div ref={host} className="story-canvas" role="group" aria-label="Story graph">
+    <div ref={host} className="story-canvas" role="group" aria-label="Story graph" tabIndex={0}
+      aria-description="Hover over a node for details, or use arrow keys to preview objects. Escape closes the card."
+      onPointerDownCapture={stopFollowing} onWheelCapture={stopFollowing}>
       <GraphExplorer style={{ position: 'absolute', inset: 0 }} styleSpec={style} animationSpec={animation} simulationSpec={simulation} background="#101a24"
         focusOnClick={false} onReady={setClient} onNodeClick={node => { if (node) onSelect(node.id); }} />
       {error && <p role="alert" className="story-graph-error">{error}</p>}
     </div>
+    <GraphObjectCard {...card} onSelect={onSelect} />
     <div className="story-graph-tools">
       <span><i className="story-dot new" /> New this scene <i className="story-dot" /> Already revealed</span>
       <div className="case-segment" aria-label="Story graph zoom">
-        <button aria-label="Zoom out" disabled={!client} onClick={() => client?.zoomOut()}>−</button>
-        <button disabled={!client} onClick={() => client?.fitView()}>Fit</button>
-        <button aria-label="Zoom in" disabled={!client} onClick={() => client?.zoomIn()}>+</button>
+        <button aria-label="Zoom out" disabled={!client} onClick={() => { stopFollowing(); client?.zoomOut(); }}>−</button>
+        <button disabled={!client} onClick={() => { stopFollowing(); if (client) fitStoryGraph(client); }}>Fit</button>
+        <button aria-label="Zoom in" disabled={!client} onClick={() => { stopFollowing(); client?.zoomIn(); }}>+</button>
       </div>
     </div>
     <ShapeLegend />
