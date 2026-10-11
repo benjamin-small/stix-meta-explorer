@@ -1,6 +1,6 @@
 # Hackers (1995) dataset
 
-A STIX 2.1 dataset that models the plot of the film *Hackers* (1995, United Artists; written by Rafael Moreno, directed by Iain Softley). It is a fan-made illustration for teaching and exploring STIX. It is not affiliated with or endorsed by the film's makers or studio. The narrative text is original.
+A STIX 2.1 dataset that models the plot of the film *Hackers* (1995, United Artists; written by Rafael Moreu, directed by Iain Softley). It is a fan-made illustration for teaching and exploring STIX. It is not affiliated with or endorsed by the film's makers or studio. The narrative text is original.
 
 ## Files
 
@@ -31,7 +31,7 @@ Every non-relationship object in the bundle, with its id. The 35 `relationship` 
 | attack-pattern | Password Guessing | `attack-pattern--8c607087-cbb0-4f32-a221-d83435f5693f` |
 | attack-pattern | Exfiltration Over C2 Channel | `attack-pattern--a00dcef2-1601-4b4f-b648-0bb7acc2ae34` |
 | attack-pattern | Stored Data Manipulation | `attack-pattern--7625cc32-dbbc-4f4a-93cf-3292f98f0b66` |
-| tool | Dial-up modem | `tool--7e7e808f-37c7-4254-8575-14e7020d6a4b` |
+| infrastructure | Dial-up modem | `infrastructure--602b04c6-31b3-403d-803c-941706e369c4` |
 | infrastructure | Gibson | `infrastructure--ef2790ea-e944-4c32-8e2e-62b404bd072c` |
 | identity | Ellingson Mineral Company | `identity--1811a3f4-5206-48e0-b9b3-1f4a739c38b9` |
 | identity | Richard Gill | `identity--4dd7a523-5d73-42c2-83bd-63f91d3f9ebd` |
@@ -59,13 +59,18 @@ Every non-relationship object in the bundle, with its id. The 35 `relationship` 
 ## Conventions
 
 - **Handles.** The threat-actor is named "Zero Cool", with "Crash Override" in `aliases`. The narrative uses each handle for its period: Zero Cool for 1988, Crash Override for 1995.
-- **Attribution direction.** The Elite (`intrusion-set`) is `attributed-to` each crew member (`threat-actor`), which is the direction STIX 2.1 defines.
+- **Activity and attribution.** The Elite is an analyst label for the crew's correlated intrusion activity, not an asserted on-screen group name. Its `intrusion-set` is `attributed-to` the involved `threat-actor` objects: attribution expresses responsibility for activity, not social membership.
+- **Modem equipment.** Dial-up modem equipment/connectivity is modeled as Infrastructure; STIX Tool represents software. The correction gives the modem and its two `uses` relationships new IDs. `../hackers-id-migrations.json` preserves existing explorer URLs. No Tool instance remains in this bundle; the type reference still supplies its generic example.
 - **Ellingson and the Gibson.** Ellingson Mineral Company is `related-to` the Gibson, because STIX does not define an identity `owns` infrastructure relationship.
 - **Reserved addresses.** Domains use the `.example` TLD. IPv4 addresses come from the RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`).
-- **File hash.** The `file` object's `hashes.SHA-256` is the real SHA-256 of the decoded `payload_bin` of its `content_ref` `artifact`.
+- **Synthetic evidence.** Addresses, the HTTP URL, observation counts/timestamps, file bytes, hashes, and sightings are teaching constructions, not forensic details from the film. The `file` object's `hashes.SHA-256` is the real SHA-256 of the authored 181-byte payload in its `content_ref` `artifact`. Both observations reference this illustrative source file; the initial partial download and complete retrieval are not separate captured copies in the model.
+- **Approximate techniques.** T1041 assumes the dial-up session is an existing C2 channel and the transfer uses that channel's protocol. The film does not establish those details; the object and walkthrough expose this assumption. Plague is classified as `criminal` with `personal-gain` motivation; insider access does not by itself establish a grievance motive.
 - **SCO ids.** Cyber-observable ids are deterministic UUIDv5 values, as STIX 2.1 recommends.
 - **No pattern qualifiers.** Example patterns do not use `WITHIN`, `REPEATS` or `START...STOP`.
-- **Fiction.** The vulnerability has no CVE, the in-story dates are invented, and the ATT&CK techniques are approximations of what happens on screen.
+- **Observation AND.** “Trace and download” matches both observations in either order. Use `FOLLOWEDBY` when order is part of the detection requirement.
+- **Fiction and revisions.** The vulnerability has no CVE and in-story dates are invented. Current `modified` timestamps record editorial revisions; they are not dates of plot events.
+
+See [story sources and modeling notes](../../../docs/hackers-story.md#story-and-modeling-sources) for the evidence behind narrative corrections and STIX choices.
 
 ## Ownership and provenance
 
@@ -83,8 +88,18 @@ Run `npm test` from the repository root. Dataset tests check unique IDs,
 reference integrity, graph behavior, pattern fixture references, and the artifact
 payload's file hash. UI tests check citations, safe Markdown, and instance navigation.
 
-The original dataset passed OASIS `stix2-validator` 3.2.0 with four expected
-`{302}` warnings on ATT&CK references lacking hashes. That is historical validation;
-our JavaScript checks are not a complete STIX schema validator or pattern matcher.
-When modifying patterns or STIX semantics, also validate them using a compatible
-STIX validator and pattern matcher, and record the results in the change.
+For STIX semantics or pattern changes, also run the OASIS validator and matcher:
+
+```sh
+python3 -m venv /tmp/hackers-validation
+/tmp/hackers-validation/bin/pip install -r scripts/hackers-validation-requirements.txt
+/tmp/hackers-validation/bin/python scripts/validate-hackers.py
+```
+
+The corrected dataset was checked on October 10, 2026 (America/New_York): all
+75 objects pass `stix2-validator` 3.2.0 with reference enforcement; all nine
+patterns pass grammar validation and match their expected observations using
+`stix2-matcher` 3.0.0. Four expected `{302}` warnings remain for ATT&CK external
+references lacking content hashes. The pinned validator version includes the
+schemas missing from the 3.3.1 wheel inspected during review. These checks verify
+structure and pattern behavior, not the historical accuracy of a story.

@@ -1,4 +1,9 @@
 import bundle from './hackers-1995/bundle.json';
+import idMigrations from './hackers-id-migrations.json';
+
+// Preserve shared explorer URLs when a modeling correction requires a new STIX ID.
+const migratedIds = new Map(Object.entries(idMigrations));
+export const resolveHackersId = (id: string | null) => id === null ? null : migratedIds.get(id) ?? id;
 
 export interface BundleObject extends Record<string, unknown> { id: string; type: string }
 export const hackersObjects: BundleObject[] = bundle.objects;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
-import { hackersObjects, hackersById, labelOf, report, objectHref, objectFamily } from '../../data/hackers';
+import { hackersObjects, hackersById, labelOf, report, objectHref, objectFamily, resolveHackersId } from '../../data/hackers';
 import patterns from '../../data/hackers-1995/patterns.json';
 import Narrative from './Narrative';
 import BundleGraph from './BundleGraph';
@@ -13,7 +13,7 @@ const types = [...new Set(hackersObjects.map(o => o.type))].sort();
 const readLocation = () => {
   const params = new URLSearchParams(window.location.search);
   const panel = params.get('panel');
-  return { requested: params.get('object'), panel: (panel === 'story' || panel === 'patterns' || panel === 'walkthrough' ? panel : 'explore') as Panel };
+  return { requested: resolveHackersId(params.get('object')), panel: (panel === 'story' || panel === 'patterns' || panel === 'walkthrough' ? panel : 'explore') as Panel };
 };
 
 export default function HackersExplorer() {
@@ -138,6 +138,6 @@ export default function HackersExplorer() {
         <InstanceDetail key={selected.id} object={selected} onReadStory={() => changePanel('story')} />
       </div>
     </div>}
-    <footer className="case-footer">A fictional, fan-made teaching dataset. Not affiliated with the film’s makers or studio. In-story dates are illustrative.</footer>
+    <footer className="case-footer">A fan-made teaching model of the film. Dates, addresses, file bytes, hashes, and sightings are synthetic; ATT&CK mappings are approximations. Not affiliated with the film’s makers or studio.</footer>
   </main>;
 }

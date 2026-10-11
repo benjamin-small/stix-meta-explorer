@@ -16,7 +16,7 @@ export default function InstanceDetail({ object, onReadStory }: { object: Bundle
   const incoming = hackersObjects.flatMap(o => refsOf(o).filter(([, id]) => id === object.id).map(([property]) => ({ object: o, property })));
   const relationships = hackersObjects.filter(o => o.type === 'relationship' && (o.source_ref === object.id || o.target_ref === object.id));
   const family = objectFamily(object.type);
-  const facts = ['aliases', 'value', 'pattern', 'first_observed', 'last_observed', 'first_seen', 'last_seen', 'count', 'opinion', 'content', 'mime_type', 'hashes']
+  const facts = ['aliases', 'labels', 'value', 'pattern', 'first_observed', 'last_observed', 'first_seen', 'last_seen', 'count', 'opinion', 'content', 'mime_type', 'hashes']
     .filter(key => object[key] !== undefined);
 
   return <section id="instance" className="case-inspector case-panel" aria-label="Selected instance">

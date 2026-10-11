@@ -63,6 +63,20 @@ test('deep links select an instance with incoming and outgoing references', () =
   window.history.replaceState({}, '', '/');
 });
 
+test.each([
+  ['tool--7e7e808f-37c7-4254-8575-14e7020d6a4b', 'Dial-up modem'],
+  ['relationship--8a87ac06-8183-4fd6-bcf3-46312becc151', 'Zero Cool → uses → Dial-up modem'],
+  ['relationship--f365b3ed-48a5-404b-9a6d-a8625ad179ea', 'Acid Burn → uses → Dial-up modem'],
+])('shared link %s survives the modem infrastructure correction', (oldId, title) => {
+  window.history.replaceState({}, '', `?view=hackers&object=${oldId}`);
+  render(<HackersExplorer />);
+  expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: title })).toBeInTheDocument();
+  expect(screen.queryByText(/That object is not in this case/)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /References/ }));
+  expect(screen.getByRole('heading', { name: /Incoming references/ })).toBeInTheDocument();
+  window.history.replaceState({}, '', '/');
+});
+
 
 test('relationships explain source, verb, and target instead of an ID fragment', () => {
   const relation = hackersObjects.find(o => o.type === 'relationship' && o.relationship_type === 'targets')!;

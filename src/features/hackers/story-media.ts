@@ -15,7 +15,7 @@ const still = (number: string, alt: string, caption: string): StoryMedia => ({
 export const storyMedia: Record<string, StoryMedia> = {
   'zero-cool': still('01', 'Dade Murphy’s face overlaid with the New York skyline.', 'Dade Murphy · Zero Cool / Crash Override'),
   'crash-override': still('03', 'A computer screen displays a taunt during the hackers’ rivalry.', 'A rivalry begins on screen.'),
-  'the-crew': still('22', 'Dade and Kate face each other with the rest of the crew gathered around them.', 'The faces behind The Elite.'),
+  'the-crew': still('22', 'Dade and Kate face each other with the rest of the crew gathered around them.', 'The faces behind the crew.'),
   'the-garbage-file': still('46', 'The Gibson’s files appear as a glowing city of blue towers and purple paths.', 'Inside the Gibson’s “City of Text.”'),
   'the-worm': still('10', 'The Plague enters a room lined with illuminated data towers.', 'The security chief inside the system he exploits.'),
   'the-frame-up': still('17', 'Richard Gill stands beside projected images of the teenage suspects.', 'The crew becomes the target of the investigation.'),
