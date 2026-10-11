@@ -6,6 +6,9 @@ import Narrative from '../Narrative';
 import HackersExamples from '../HackersExamples';
 import HackersExplorer from '../HackersExplorer';
 
+// GPU mounting is covered in the real browser; these tests exercise host navigation.
+vi.mock('@poietic-tech/graphing-library/react', () => ({ GraphExplorer: () => <canvas aria-label="Graph renderer" /> }));
+
 test('owned dataset has unique STIX IDs, resolved references, and valid pattern fixtures', () => {
   expect(hackersObjects).toHaveLength(75);
   expect(hackersById.size).toBe(75);

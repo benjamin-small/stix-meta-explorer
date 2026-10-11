@@ -5,4 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/stix-meta-explorer/',
+  // Keep the library's WASM URL relative to its package during development.
+  optimizeDeps: { exclude: ['@poietic-tech/graphing-library'] },
 })
