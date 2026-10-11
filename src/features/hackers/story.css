@@ -26,12 +26,14 @@
 .story-image figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin-top: 8px; font-size: 9px; line-height: 1.5; color: #99abb9; }
 .story-image figcaption a { white-space: nowrap; }
 .story-controls { margin-top: auto; }
-.story-progress { height: 3px; background: #30404c; overflow: hidden; border-radius: 2px; margin-bottom: 18px; }
+.story-progress { height: 3px; background: #30404c; overflow: hidden; border-radius: 2px; margin-top: 12px; }
 .story-progress span { display: block; height: 100%; background: var(--case-accent); }
 .story-transport { display: flex; gap: 8px; }
-.story-transport .case-button { min-height: 44px; min-width: 44px; }
-.story-transport .story-play { flex: 1; background: #f1b86a; color: #1a1e23; border-color: #f1b86a; font-weight: 650; }
-.story-controls > .case-help { margin-top: 12px; min-height: 40px; font-size: 11px; }
+.story-transport .case-button { flex: 1; min-height: 44px; min-width: 44px; }
+.story-transport .story-next { background: #f1b86a; color: #1a1e23; border-color: #f1b86a; font-weight: 650; }
+.story-narration { border-top: 1px solid #34424b; margin-top: 16px; padding-top: 16px; }
+.story-narration > .case-button { width: 100%; min-height: 44px; }
+.story-narration > .case-help { margin-top: 10px; font-size: 11px; }
 .story-takeaway { border-top: 1px solid #34424b; padding-top: 20px; margin-top: 12px; }
 .story-takeaway > p:last-child { font-size: 12px; color: #a6bac7; line-height: 1.7; margin-top: 9px; }
 .story-visual { background: #101a24; display: flex; flex-direction: column; align-self: start; position: sticky; top: 16px; }
@@ -96,8 +98,4 @@
   .story-discoveries button { overflow-wrap: anywhere; }
 }
 @media (prefers-reduced-motion: reduce) { .story-prose { animation: none; } }
-.story-option { display: flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 10px; color: #e2e9ef; font-size: 13px; cursor: pointer; }
-.story-option input { accent-color: #e5b768; width: 17px; height: 17px; flex-shrink: 0; }
-.story-option small { color: var(--case-muted); font-size: 10px; margin-left: auto; }
-.story-option:has(input:disabled) { opacity: .6; cursor: default; }
 .story-speech-error { color: #f4c98e; font-size: 12px; line-height: 1.7; margin: 10px 0; }
