@@ -5,6 +5,8 @@ import { storyFrames, storyScenes } from './story-scenes';
 import { revealStoryGraph } from './story-graph';
 import { typeShapeRules } from './graph-shapes';
 import ShapeLegend from './ShapeLegend';
+import GraphLabels from './GraphLabels';
+import type { LabelNode, LabelEdge } from './graph-label-layout';
 import { fitStoryGraph, followStoryLayout } from './story-camera';
 import GraphObjectCard from './GraphObjectCard';
 import { useGraphObjectCard } from './useGraphObjectCard';
@@ -41,7 +43,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
     transition: { duration_ms: 700, easing: 'ease-in-out', layout_tween: true, camera_follow: false, fit_on_settle: true },
   }), [reducedMotion]);
   const style = useMemo<StyleSpec>(() => ({
-    node_base: { color: '#91a9b8', radius: 13, opacity: .5, label_visible: true },
+    node_base: { color: '#91a9b8', radius: 13, opacity: .5, label_visible: false },
     node_rules: [
       ...typeShapeRules,
       { when: { attr: 'stix_id', one_of: frame.activeIds }, set: { color: '#b1daeb', opacity: 1 } },
@@ -49,9 +51,21 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
       { when: { attr: 'stix_id', equals: selected ?? '' }, set: { color: '#fff0c7', radius: 20, opacity: 1 } },
     ],
     edge_base: { color: '#6d889a', width: 1.3, opacity: .3, label_visible: false, label_attr: 'label' },
-    edge_rules: [{ when: { attr: 'edge_id', one_of: frame.newEdges.map(e => e.id) }, set: { color: '#f1b86a', width: 2.5, opacity: 1, label_visible: true } }],
-    labels: { min_screen_radius_px: 2, max_labels: 32, edge_min_screen_length_px: 65, max_edge_labels: 10 },
+    edge_rules: [{ when: { attr: 'edge_id', one_of: frame.newEdges.map(e => e.id) }, set: { color: '#f1b86a', width: 2.5, opacity: 1 } }],
+    labels: { min_screen_radius_px: 2, max_labels: 0, edge_min_screen_length_px: 65, max_edge_labels: 0 },
   }), [frame, step, selected]);
+
+  const labelNodes = useMemo<LabelNode[]>(() => frame.graph.nodes.map(node => {
+    const isNew = storyScenes[step].introduced.includes(node.id);
+    const focus = node.id === selected;
+    const active = frame.activeIds.includes(node.id);
+    return { id: node.id, text: node.label, radius: focus ? 20 : isNew ? 17 : 13,
+      priority: focus ? 0 : isNew ? 1 : active ? 2 : 4,
+      tone: focus ? 'selected' : isNew ? 'new' : active ? 'normal' : 'muted' };
+  }), [frame, step, selected]);
+  const labelEdges = useMemo<LabelEdge[]>(() => frame.newEdges.map(edge => ({
+    id: edge.id, source: edge.source, target: edge.target, text: edge.label.replaceAll('_', ' '), priority: 3, tone: 'new',
+  })), [frame]);
 
   useEffect(() => {
     if (!client) return;
@@ -86,6 +100,7 @@ export default function StoryGraph({ step, selected, onSelect, onReady }: {
       onPointerDownCapture={stopFollowing} onWheelCapture={stopFollowing}>
       <GraphExplorer style={{ position: 'absolute', inset: 0 }} styleSpec={style} animationSpec={animation} simulationSpec={simulation} background="#101a24"
         focusOnClick={false} onReady={setClient} onNodeClick={node => { if (node) onSelect(node.id); }} />
+      <GraphLabels client={client} host={host} nodes={labelNodes} edges={labelEdges} />
       {error && <p role="alert" className="story-graph-error">{error}</p>}
     </div>
     <GraphObjectCard {...card} />

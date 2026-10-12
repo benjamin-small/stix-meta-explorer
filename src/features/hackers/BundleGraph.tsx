@@ -5,6 +5,8 @@ import { hackersById, labelOf, objectFamily, objectHref } from '../../data/hacke
 import { graphSelection, wholeCaseGraph as graph } from './graph-model';
 import { typeShapeRules } from './graph-shapes';
 import ShapeLegend from './ShapeLegend';
+import GraphLabels from './GraphLabels';
+import type { LabelNode, LabelEdge } from './graph-label-layout';
 import GraphObjectCard from './GraphObjectCard';
 import { useGraphObjectCard } from './useGraphObjectCard';
 import { focusCaseGraph } from './case-camera';
@@ -38,16 +40,27 @@ export default function BundleGraph({ selected, focusRequest = 0, onNodeSelect }
     node_rules: [
       ...typeShapeRules,
       ...families.map(family => ({ when: { attr: 'family', equals: family.label }, set: { color: family.color } })),
-      { when: { attr: 'stix_id', one_of: selection.nearbyIds }, set: { opacity: 1, label_visible: true } },
-      { when: { attr: 'stix_id', one_of: selection.focusIds }, set: { radius: 66, color: '#ffdc91', opacity: 1, label_visible: true } },
+      { when: { attr: 'stix_id', one_of: selection.nearbyIds }, set: { opacity: 1 } },
+      { when: { attr: 'stix_id', one_of: selection.focusIds }, set: { radius: 66, color: '#ffdc91', opacity: 1 } },
     ],
     edge_base: { color: '#71899c', width: 2, opacity: .35, label_attr: 'label', label_visible: false },
     edge_rules: [
-      { when: { attr: 'edge_id', one_of: selection.edgeIds }, set: { color: '#b8d7e8', width: 4, opacity: 1, label_visible: true } },
-      { when: { attr: 'relationshipId', equals: selected }, set: { color: '#ffdc91', width: 5, opacity: 1, label_visible: true } },
+      { when: { attr: 'edge_id', one_of: selection.edgeIds }, set: { color: '#b8d7e8', width: 4, opacity: 1 } },
+      { when: { attr: 'relationshipId', equals: selected }, set: { color: '#ffdc91', width: 5, opacity: 1 } },
     ],
-    labels: { min_screen_radius_px: 2, max_labels: 50, edge_min_screen_length_px: 45, max_edge_labels: 24 },
+    labels: { min_screen_radius_px: 2, max_labels: 0, edge_min_screen_length_px: 45, max_edge_labels: 0 },
   }), [selected, selection]);
+
+  const labelNodes = useMemo<LabelNode[]>(() => graph.nodes.map(node => {
+    const focus = selection.focusIds.includes(node.id);
+    return { id: node.id, text: node.label, radius: focus ? 66 : 48, priority: focus ? 0 : 2,
+      tone: focus ? 'selected' : 'normal', visible: selection.nearbyIds.includes(node.id) };
+  }), [selection]);
+  const labelEdges = useMemo<LabelEdge[]>(() => graph.edges.filter(edge => selection.edgeIds.includes(edge.id)).map(edge => ({
+    id: edge.id, source: edge.source, target: edge.target, text: edge.attrs.label,
+    priority: edge.attrs.relationshipId === selected ? 1 : 3,
+    tone: edge.attrs.relationshipId === selected ? 'selected' : 'normal',
+  })), [selection, selected]);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -101,6 +114,7 @@ export default function BundleGraph({ selected, focusRequest = 0, onNodeSelect }
         onReady={setClient}
         onNodeClick={details => { if (details) onNodeSelect(details.id); }}
       />
+      <GraphLabels client={client} host={canvasHost} nodes={labelNodes} edges={labelEdges} />
     </div>
     <GraphObjectCard {...card} />
     <div className="case-graph-footer">
