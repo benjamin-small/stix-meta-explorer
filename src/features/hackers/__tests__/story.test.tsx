@@ -138,11 +138,12 @@ test('the new view stays separate from the reader and opens selected objects in 
   expect(within(screen.getByRole('region', { name: 'Selected instance' })).getByRole('heading', { name: 'Zero Cool' })).toBeInTheDocument();
 });
 
-test('each scene has one sourced still, with a recoverable fallback when remote media fails', () => {
+test('each scene has one locally served, sourced still with a recoverable image fallback', () => {
   render(<StoryWalkthrough onExplore={() => {}} />);
   for (let step = 0; step < storyScenes.length; step++) {
     fireEvent.click(screen.getByRole('button', { name: `Scene ${step + 1}: ${storyScenes[step].shortTitle}` }));
     expect(screen.getAllByRole('img')).toHaveLength(1);
+    expect(new URL(screen.getByRole('img').getAttribute('src')!, window.location.href).origin).toBe(window.location.origin);
     expect(screen.getByRole('img')).toHaveAttribute('alt', storyMedia[storyScenes[step].id].alt);
     expect(screen.getByRole('link', { name: 'Film still · source ↗' })).toHaveAttribute('href', storyMedia[storyScenes[step].id].source);
   }

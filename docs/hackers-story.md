@@ -36,7 +36,9 @@ Both the explorer and story graph share an explicit STIX type mapping in `graph-
 
 `story-media.ts` maps each scene to one visually reviewed still in the [Cinematic Freeze Hackers gallery](https://www.cinematicfreeze.com/hackers-1995-stills/). The gallery was inspected on October 10, 2026. The film is *Hackers* (1995), directed by Iain Softley, MGM/United Artists; these images are third-party film imagery, not original dataset material or assets covered by the dataset's MIT license. The gallery's own copyright statement does not establish a new license for this repository.
 
-The app references the externally hosted images rather than copying their binaries. Each image has descriptive alternative text, a caption, and a source link. Requests omit the referrer. A failed request keeps its caption and source link in place, and resets the image state on the next scene. No GIFs, remote video players, or recorded audio load. To change a visual, edit its manifest entry and verify the still and caption together in a browser.
+The nine original JPEGs are stored in `src/assets/hackers-1995/` and imported by `story-media.ts`. Vite emits versioned asset filenames under the configured base path, so development and production serve each image from the app's own origin. Neither builds nor visitors need to fetch image bytes from the gallery. The [asset provenance record](../src/assets/hackers-1995/README.md) lists the original URLs, download date, and SHA-256 checksums.
+
+Each image has descriptive alternative text, a caption, and a source link. A failed request keeps its caption and source link in place, and resets the image state on the next scene. No GIFs, remote video players, or recorded audio load. To change a visual, add the local image, update its manifest entry and provenance record, and verify the still and caption together in a browser.
 
 | Scene | Gallery still | Visual role |
 | --- | --- | --- |
