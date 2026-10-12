@@ -10,7 +10,7 @@ import { shapeGroups, typeShapeRules } from '../graph-shapes';
 const driver = vi.hoisted(() => ({
   props: null as GraphExplorerProps | null,
   mounts: 0,
-  client: { zoomIn: vi.fn(), zoomOut: vi.fn(), fitView: vi.fn(), focus: vi.fn(), cameraPose: vi.fn(() => ({ target: [0, 0, 0], distance: 100, yaw: 0, pitch: 0 })), setCameraPose: vi.fn(), graphNodes: vi.fn(() => []), zoom: vi.fn() },
+  client: { zoomIn: vi.fn(), zoomOut: vi.fn(), fitView: vi.fn(), focus: vi.fn(), cameraPose: vi.fn(() => ({ target: [0, 0, 0], distance: 100, yaw: 0, pitch: 0 })), setCameraPose: vi.fn(), on: vi.fn(() => vi.fn()), visibleNodes: vi.fn(() => []), project: vi.fn(() => ({ x: 0, y: 0 })), graphNodes: vi.fn(() => []), zoom: vi.fn() },
 }));
 
 vi.mock('@poietic-tech/graphing-library/react', () => ({
